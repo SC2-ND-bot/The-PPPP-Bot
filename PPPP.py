@@ -16,11 +16,14 @@ class PPPP(sc2.BotAI):
                 self.do(worker.attack(self.enemy_start_locations[0]))
             return
 
+        nexuses = self.structures(NEXUS)
+        
+        ################# This is the logic relevant for milestone 1 #################
+
+
         potential_working_locations = {}
 
-        nexuses = self.structures(NEXUS)
-
-        print(self.resources[0].position.y)
+        # print(self.resources[0].position.y)
 
         for worker in self.workers:
             if worker.is_idle:
@@ -37,13 +40,15 @@ class PPPP(sc2.BotAI):
                     }
 
 
+        ######################################################################################################
+
         # If we have no pylon, build one near starting nexus
         if self.supply_left < 4 and self.already_pending(PYLON) == 0:
             if self.can_afford(PYLON):
                 await self.build(PYLON, near=self.main_base_ramp.protoss_wall_pylon)
 
 
-        # Make probes until we have 16 total
+        # Make probes until we have 16 in each base
         for nexus in nexuses:
             if self.supply_workers < 22 * len(nexuses) and nexus.is_idle:
                 if self.can_afford(PROBE):
