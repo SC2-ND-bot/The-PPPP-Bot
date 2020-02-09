@@ -7,6 +7,9 @@ from sc2.player import Bot, Computer
 from sc2.position import Point2, Point3
 
 class PPPP(sc2.BotAI):
+	def __init__(self):
+		self.path_coord_dict = {}
+
     async def on_step(self, iteration):
         if iteration == 0:
             await self.chat_send("(probe)(pylon)(cannon)(cannon)(gg)")
