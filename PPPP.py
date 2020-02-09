@@ -4,11 +4,27 @@ import sc2
 from sc2 import Race, Difficulty
 from sc2.constants import *
 from sc2.player import Bot, Computer
+from sc2.position import Point2, Point3
 
 class PPPP(sc2.BotAI):
     async def on_step(self, iteration):
         if iteration == 0:
             await self.chat_send("(probe)(pylon)(cannon)(cannon)(gg)")
+            for resource in self.resources:
+                x_coord = floor(resource.position.x)
+                y_coord = floor(resource.position.y)
+                working_locations = {}
+                working_locations[(x_coord, y_coord)] = resource
+
+                # Important Resource Properties
+                # is_mineral_field
+                # is_vespene_geyser
+                # vespene_contents
+                # mineral_contents
+                # ideal_harvesters
+                # assigned_harvesters
+                # surplus_harvesters
+                
 
         if not self.townhalls:
             # Attack with all workers if we don't have any nexuses left, attack-move on enemy spawn (doesn't work on 4 player map) so that probes auto attack on the way
@@ -19,26 +35,22 @@ class PPPP(sc2.BotAI):
         nexuses = self.structures(NEXUS)
         
         ################# This is the logic relevant for milestone 1 #################
-
-
-        potential_working_locations = {}
-
-        # print(self.resources[0].position.y)
-
+        
         for worker in self.workers:
             if worker.is_idle:
-                print("this worker is idle, here are the available structures")
-                for resource in self.resources:
-                    remaining = 0
-                    if resource.is_vespene_geyser:
-                        remaining = resource.vespene_contents
-                    else:
-                        remaining = resource.mineral_contents
-                    potential_working_locations[resource.position] = {
-                        "empty": remaining <= 0,
-                        "full": resource.ideal_harvesters - resource.assigned_harvesters <= 0
-                    }
 
+                # DEFINE: go_to_work(worker, working_locations):
+                # 
+                # Search through Adjencency List to find the first (x, y) that
+                # has an entry in the working_locations dictionary and also 
+                # fits the following criteria:
+                #   it does not have surplus workers
+                #   it hasn't been exhausted. 
+                # Once the nearest resource (that fits the criteria) is found, then
+                # utilize the resource object from the working_locations dictionary
+                # anbd call 'self.do(worker.gather(resource))'.
+
+                # go_to_work(worker, working_locations)
 
         ######################################################################################################
 
