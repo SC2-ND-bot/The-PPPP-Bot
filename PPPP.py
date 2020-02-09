@@ -10,6 +10,7 @@ class PPPP(sc2.BotAI):
     async def on_step(self, iteration):
         if iteration == 0:
             await self.chat_send("(probe)(pylon)(cannon)(cannon)(gg)")
+			await self.build_coord_dict()
             for resource in self.resources:
                 x_coord = floor(resource.position.x)
                 y_coord = floor(resource.position.y)
@@ -73,6 +74,28 @@ class PPPP(sc2.BotAI):
                     if not nexus.is_idle and not nexus.has_buff(BuffId.CHRONOBOOSTENERGYCOST):
                         self.do(loop_nexus(AbilityId.EFFECT_CHRONOBOOSTENERGYCOST, nexus))
                         break
+	
+	async def build_coord_dict(self):
+		path_matrix = self.game_info.pathing_grid.data_numpy
+		
+		mheight = len(path_matrix)
+		mwidth = len(path_matrix[1])
+		
+		for i in range(0, mheight):
+			for j in range(0, mwidth):
+				if path_matrix[i,j] == 1:
+					neighbors = lambda i, j: [(x,y) for x in range(i-1, i+2)
+														for y in range(j-1, j+2)
+															if (-1 < i <= mheight and 
+																-1 < j <= mwidth and
+																(i != x or j != y) and
+																(0 <= x <= mheight) and
+																(0 <= y <= mwidth))]
+					self.path_coord_dict.setdefault((i,j), [])
+					for z in neighbors(i,j):
+						if path_matrix[z] == 1:
+							self.path_coord_dict[(i,j)].append(z)
+		print("build_coord_dict() FINISHED!")
 
 def main():
     sc2.run_game(
