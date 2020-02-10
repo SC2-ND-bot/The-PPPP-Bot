@@ -2,7 +2,7 @@
 
 ## Installation and Testing
 
-First, you must install [Starcraft II: Wings of Liberty].(https://www.battle.net/download/getInstallerForGame?gameProgram=STARCRAFT_2)
+First, you must install [Starcraft II: Wings of Liberty](https://www.battle.net/download/getInstallerForGame?gameProgram=STARCRAFT_2).
 
 You must also have **Python 3.7** or newer.
 
