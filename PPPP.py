@@ -99,6 +99,27 @@ class PPPP(sc2.BotAI):
                             self.path_coord_dict[(i,j)].append(z)
         print("build_coord_dict() FINISHED!")
 
+	async def bfs(self, root):
+		visited = [root]
+		queue = [root]
+		
+		while queue:
+			node = queue.pop(0)
+			for neighbor in self.path_coord_dict[node]:
+				if neighbor not in visited:
+					if self.working_locations.get(neighbor) is not None:
+						resource = self.working_locations[neighbor]
+						is_not_full = (resource.ideal_harvesters - resource.assigned_harvesters) > 0
+						if resource.is_mineral_field:
+							is_not_empty = resource.mineral_contents > 0
+						elif resource.is_vespene_geyser:
+							is_not_empty = resource.vespene_contents > 0
+							
+						if is_not_full and is_not_empty:
+							return neighbor
+					visited.append(neighbor)
+					queue.append(neighbor)
+
 def main():
     sc2.run_game(
         sc2.maps.get("AcropolisLE"),
