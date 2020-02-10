@@ -3,6 +3,7 @@
 ## Installation and Testing
 
 First, you must install Starcraft II: Wings of Liberty manually from Blizzard's website!
+You must also have Python 3.7 or newer.
 
 Then, you can install all other dependencies by running `make install`.
 
