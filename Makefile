@@ -6,7 +6,7 @@ all: install test clean
 
 # Installs the Python library containing the API used by the bot
 install:
-	pip3 install --user --upgrade sc2
+	pip install --upgrade pipenv burnysc2
 
 # Runs a test game until the user ends the game
 test:
@@ -14,4 +14,4 @@ test:
 
 # Removes the python library containing the API used by the bot
 clean:
-	pip3 uninstall sc2
+	pip3 uninstall burnysc2
