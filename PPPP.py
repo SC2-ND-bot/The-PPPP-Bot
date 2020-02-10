@@ -16,12 +16,13 @@ class PPPP(sc2.BotAI):
         if iteration == 0:
             await self.chat_send("(probe)(pylon)(cannon)(cannon)(gg)")
             await self.build_coord_dict()
-            bases = self.townhalls.ready
-            gas_buildings = self.gas_buildings.ready
-            for resource in bases | gas_buildings:
-                x_coord = math.floor(resource.position.x)
-                y_coord = math.floor(resource.position.y)
-                self.working_locations[(x_coord, y_coord)] = resource
+        
+        bases = self.townhalls.ready
+        gas_buildings = self.gas_buildings.ready
+        for resource in bases | gas_buildings:
+            x_coord = math.floor(resource.position.x)
+            y_coord = math.floor(resource.position.y)
+            self.working_locations[(x_coord, y_coord)] = resource
 
         if not self.townhalls:
             # Attack with all workers if we don't have any nexuses left, attack-move on enemy spawn (doesn't work on 4 player map) so that probes auto attack on the way
@@ -35,7 +36,6 @@ class PPPP(sc2.BotAI):
         
         for worker in self.workers:
             if worker.is_idle:
-                print("calling go to work")
                 self.go_to_work(worker)
 
         ######################################################################################################
@@ -47,9 +47,14 @@ class PPPP(sc2.BotAI):
 
         # Make probes until we have 16 in each base
         for nexus in nexuses:
-            if self.supply_workers < 22 and nexus.is_idle:
+            if self.supply_workers < 19 and nexus.is_idle:
                 if self.can_afford(PROBE):
                     self.do(nexus.train(PROBE), subtract_cost=True, subtract_supply=True)
+        
+        if self.supply_workers == 19 and len(self.structures(PYLON)) < 3 and self.already_pending(PYLON) == 0:
+            if self.can_afford(PYLON):
+                await self.build(PYLON, near=self.main_base_ramp.protoss_wall_pylon)
+
 
     async def build_coord_dict(self):
         path_matrix = self.game_info.pathing_grid.data_numpy
@@ -66,20 +71,16 @@ class PPPP(sc2.BotAI):
         print("build_coord_dict() FINISHED!")
 
     def go_to_work(self, worker):
-        print("inside go to work")
         x_coord = math.floor(worker.position.x)
         y_coord = math.floor(worker.position.y)
         worker_coords = (x_coord, y_coord)
 
         working_location = self.bfs(worker_coords)
-        print("working location: ", working_location)
         if (working_location is not None):
-            print("working_location in self.structures(NEXUS): ", self.working_locations[working_location] in self.structures(NEXUS))
             if (self.working_locations[working_location] in self.structures(NEXUS)):
                 # print("self.mineral_field: ", self.mineral_field)
                 for mineral in self.mineral_field:
                     if mineral.distance_to(working_location) <= 8:
-                        print("found minerals close to Nexus")
                         self.do(worker.gather(mineral))
                         break
             else:
@@ -96,14 +97,10 @@ class PPPP(sc2.BotAI):
                 if neighbor not in visited:
                     if self.working_locations.get(neighbor) is not None:
                         resource = self.working_locations[neighbor]
-                        is_not_full = (resource.ideal_harvesters - resource.assigned_harvesters) > 0
-                        is_not_empty = True
-
-                        if resource.is_mineral_field:
-                            is_not_empty = resource.mineral_contents > 0
-                        elif resource.is_vespene_geyser:
-                            is_not_empty = resource.vespene_contents > 0
-                        if True:
+                        print(resource.surplus_harvesters)
+                        is_not_full = resource.surplus_harvesters <= 0
+                        
+                        if is_not_full:
                             return neighbor
                         
                     visited.append(neighbor)
