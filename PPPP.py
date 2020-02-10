@@ -2,23 +2,30 @@ import random
 
 import sc2
 from sc2 import Race, Difficulty
+import math
 from sc2.constants import *
 from sc2.player import Bot, Computer
 from sc2.position import Point2, Point3
 
 class PPPP(sc2.BotAI):
-	def __init__(self):
-		self.path_coord_dict = {}
+    def __init__(self):
+        self.path_coord_dict = {}
+
+    def go_to_work(self, worker, working_locations):
+        print(len(self.path_coord_dict))
+        
 
     async def on_step(self, iteration):
         if iteration == 0:
             await self.chat_send("(probe)(pylon)(cannon)(cannon)(gg)")
-			await self.build_coord_dict()
+            await self.build_coord_dict()
+            self.go_to_work(None, None)
             for resource in self.resources:
-                x_coord = floor(resource.position.x)
-                y_coord = floor(resource.position.y)
+                x_coord = math.floor(resource.position.x)
+                y_coord = math.floor(resource.position.y)
                 working_locations = {}
                 working_locations[(x_coord, y_coord)] = resource
+
 
                 # Important Resource Properties
                 # is_mineral_field
@@ -40,8 +47,8 @@ class PPPP(sc2.BotAI):
         
         ################# This is the logic relevant for milestone 1 #################
         
-        for worker in self.workers:
-            if worker.is_idle:
+        # for worker in self.workers:
+        #     if worker.is_idle:
 
                 # DEFINE: go_to_work(worker, working_locations):
                 # 
@@ -77,28 +84,20 @@ class PPPP(sc2.BotAI):
                     if not nexus.is_idle and not nexus.has_buff(BuffId.CHRONOBOOSTENERGYCOST):
                         self.do(loop_nexus(AbilityId.EFFECT_CHRONOBOOSTENERGYCOST, nexus))
                         break
-	
-	async def build_coord_dict(self):
-		path_matrix = self.game_info.pathing_grid.data_numpy
-		
-		mheight = len(path_matrix)
-		mwidth = len(path_matrix[1])
-		
-		for i in range(0, mheight):
-			for j in range(0, mwidth):
-				if path_matrix[i,j] == 1:
-					neighbors = lambda i, j: [(x,y) for x in range(i-1, i+2)
-														for y in range(j-1, j+2)
-															if (-1 < i <= mheight and 
-																-1 < j <= mwidth and
-																(i != x or j != y) and
-																(0 <= x <= mheight) and
-																(0 <= y <= mwidth))]
-					self.path_coord_dict.setdefault((i,j), [])
-					for z in neighbors(i,j):
-						if path_matrix[z] == 1:
-							self.path_coord_dict[(i,j)].append(z)
-		print("build_coord_dict() FINISHED!")
+
+    async def build_coord_dict(self):
+        path_matrix = self.game_info.pathing_grid.data_numpy
+        mheight = len(path_matrix)
+        mwidth = len(path_matrix[1])        
+        for i in range(0, mheight):
+            for j in range(0, mwidth):
+                if path_matrix[i,j] == 1:
+                    neighbors = lambda i, j: [(x,y) for x in range(i-1, i+2) for y in range(j-1, j+2) if (-1 < i <= mheight and -1 < j <= mwidth and (i != x or j != y) and (0 <= x <= mheight) and (0 <= y <= mwidth))]
+                    self.path_coord_dict.setdefault((i,j), [])
+                    for z in neighbors(i,j):
+                        if path_matrix[z] == 1:
+                            self.path_coord_dict[(i,j)].append(z)
+        print("build_coord_dict() FINISHED!")
 
 def main():
     sc2.run_game(
