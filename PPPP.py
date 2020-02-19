@@ -8,11 +8,20 @@ from sc2.constants import *
 from sc2.player import Bot, Computer
 from sc2.position import Point2, Point3
 from sc2.ids.unit_typeid import UnitTypeId
+from state_machine import StateMachine
+from agents.probe import ProbeAgent
 
 class PPPP(sc2.BotAI):
     def __init__(self):
         self.path_coord_dict = {}
         self.working_locations = {}
+        self.agents = []
+
+    def create_agent(self, unit):
+        if unit.type_id == PROBE:
+            newProbeAgent = ProbeAgent(unit)
+            self.agents.append(newProbeAgent)
+
 
     async def on_step(self, iteration):
         if iteration == 0:
@@ -22,6 +31,7 @@ class PPPP(sc2.BotAI):
         
         bases = self.townhalls.ready
         gas_buildings = self.gas_buildings.ready
+        
         for resource in bases | gas_buildings:
             x_coord = math.floor(resource.position.x)
             y_coord = math.floor(resource.position.y)
@@ -78,6 +88,8 @@ class PPPP(sc2.BotAI):
                 if self.research(self.nodeContents):
                     self.buildTree.curr.executed = True
 
+        self.start_location
+
     async def build_coord_dict(self):
         path_matrix = self.game_info.pathing_grid.data_numpy
         mheight = len(path_matrix)
@@ -97,36 +109,37 @@ class PPPP(sc2.BotAI):
         y_coord = math.floor(worker.position.y)
         worker_coords = (x_coord, y_coord)
 
-        working_location = self.bfs(worker_coords)
-        if (working_location is not None):
-            if (self.working_locations[working_location] in self.structures(NEXUS)):
-                # print("self.mineral_field: ", self.mineral_field)
+        working_location = self.find_working_location(worker_coords)
+        if working_location is not None:
+            if working_location.type_id == NEXUS:
                 for mineral in self.mineral_field:
-                    if mineral.distance_to(working_location) <= 8:
+                    if mineral.distance_to(working_location.position) <= 8:
                         self.do(worker.gather(mineral))
                         break
             else:
-                self.do(worker.gather(self.working_locations[working_location]))
+                self.do(worker.gather(working_location))
         else:
-            print("working location is None")
-            
-    def bfs(self, root):
+            print("could not find location")
+
+
+    def find_working_location(self, root):
         visited = [root]
         queue = [root]
         while queue:
             node = queue.pop(0)
-            for neighbor in self.path_coord_dict[node]:
+            for neighbor in self.path_coord_dict.get(node, []):
                 if neighbor not in visited:
                     if self.working_locations.get(neighbor) is not None:
-                        resource = self.working_locations[neighbor]
-                        print(resource.surplus_harvesters)
-                        is_not_full = resource.surplus_harvesters <= 0
+                        working_location = self.working_locations[neighbor]
+                        is_not_full = working_location.surplus_harvesters <= 0
                         
-                        if is_not_full:
-                            return neighbor
+                        # if is_not_full:
+                        #     return working_location
+                        return working_location
                         
                     visited.append(neighbor)
                     queue.append(neighbor)
+        return None
 
 def main():
     sc2.run_game(
