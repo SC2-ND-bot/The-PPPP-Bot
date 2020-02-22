@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import Enum, auto
 
 class AgentStates(Enum):
-    IDLE_STATE: 0
-    PERFORM_ACTION_STATE: 1
-    END_STATE: 2
+    IDLE_STATE: 1
+    PERFORM_ACTION_STATE: 2
+    END_STATE: 3
