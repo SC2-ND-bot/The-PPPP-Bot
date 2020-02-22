@@ -6,8 +6,9 @@ from FSM.states import AgentStates
 
 class Agent:
 
-    def __init__(self, unit):
+    def __init__(self, unit, worldState):
         self.unit = unit
+		self.worldState = worldState
         self.stateMachine = StateMachine()
 
         self.availableActions = []
@@ -70,3 +71,8 @@ class Agent:
     # # Still unsure if we require this state and handler
     def endStateHandler(self):
         print('reached end state')
+
+	def updateWorldState(worldState):
+		self.worldState = worldState
+		# import copy
+		# self.worldState = copy.deepcopy(worldState)
