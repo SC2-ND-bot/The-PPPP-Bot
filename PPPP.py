@@ -14,11 +14,12 @@ class PPPP(sc2.BotAI):
     def __init__(self):
         self.path_coord_dict = {}
         self.working_locations = {}
-        self.agents = []
+        self.agents = {}
 
     def create_agent(self, unit):
         if unit.type_id == ADEPT:
-            self.agents.append(AdeptAgent(unit))
+            print('made adept agent')
+            self.agents[unit] = AdeptAgent(unit)
 
     async def on_step(self, iteration):
         if iteration == 0:
@@ -44,20 +45,20 @@ class PPPP(sc2.BotAI):
         for worker in self.workers:
             if worker.is_idle:
                 self.go_to_work(worker)
+        #####################################################################################################
 
-        ######################################################################################################
+        for unit in self.units(ADEPT).ready:
+            if not self.agents.get(unit, False):
+                print('trying to create unit')
+                print(unit.type_id)
+                self.create_agent(unit)
+            else:
+                self.agents[unit].stateMachine.run_step(self)
 
-        for sg in self.structures(STARGATE).ready.idle:
-                if self.can_afford(VOIDRAY):
-                    self.do(sg.train(VOIDRAY), subtract_cost=True, subtract_supply=True)
-
-        gateway = self.structures(UnitTypeId.GATEWAY).random_or(None)
-
-        for gw in self.structures(GATEWAY).ready.idle:
-            print('trying to build adept step 1')
-            if self.can_afford(ADEPT) and len(self.structures(CYBERNETICSCORE).ready) > 0:
-                print('trying to build adept step 2')
-                self.do(gw.train(ADEPT), subtract_cost=True, subtract_supply=True)
+        if self.units(ADEPT).amount < 1:
+            for gw in self.structures(GATEWAY).ready.idle:
+                if self.can_afford(ADEPT) and len(self.structures(CYBERNETICSCORE).ready) > 0:
+                    self.do(gw.train(ADEPT), subtract_cost=True, subtract_supply=True)
 
         # If we have no pylon, build one at main base ramp
         if len(self.structures(PYLON)) < 1 and self.already_pending(PYLON) == 0:
@@ -102,23 +103,20 @@ class PPPP(sc2.BotAI):
         for nexus in self.structures(NEXUS):
             
             # TODO: redistribute workers
-            # if nexus.surplus_harversters > 0:
+            if nexus.surplus_harvesters > 0:
+                await self.distribute_workers()
                 
             # TODO: This needs work
             if self.supply_workers + self.already_pending(PROBE) < self.townhalls.amount * 22 and nexus.is_idle:
                 if self.can_afford(PROBE):
                     self.do(nexus.train(PROBE), subtract_cost=True, subtract_supply=True)
 
-            # if self.supply_workers > 16 * self.townhalls.amount() and self.gas_buildings.ready < self.townhalls.amount() * 2:
-            #     closest_vespene_geysers = enemy_zerglings.closest_n_units(nexus, 2)
-
-        if self.supply_left < 3 and self.already_pending(PYLON) == 0:
-            worker = self.workers.idle.random_or(None)
-            if self.can_afford(PYLON) and worker:
-                self.do(worker.build(UnitTypeId.PYLON,near=self.townhalls.ready.random_or(None)))
-
-        # self.build_protoss_ramp_wall()
-        # self.manage_worker_count()
+            if self.supply_left < 3 and self.already_pending(PYLON) == 0:
+                worker = self.workers.idle.random_or(None)
+                if self.can_afford(PYLON) and worker:
+                    print('trying to build pylon')
+                    await self.build(PYLON, near=nexus)
+                # self.do(worker.build(UnitTypeId.PYLON,self.townhalls.ready.random_or(None)))
 
     async def build_coord_dict(self):
         path_matrix = self.game_info.pathing_grid.data_numpy
@@ -175,7 +173,7 @@ def main():
     sc2.run_game(
         sc2.maps.get("AcropolisLE"),
         [Bot(Race.Protoss, PPPP(), name="The PPPP"), Computer(Race.Protoss, Difficulty.VeryEasy)],
-        realtime=True,
+        realtime=False,
     )
 
 
