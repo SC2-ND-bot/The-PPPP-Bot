@@ -7,15 +7,19 @@ class StateMachine:
 
     def add_state(self, name, handler, endState=False):
         self.handlers[name] = handler
-        if end_state:
+        if endState:
             self.endStates.append(name)
     
     def set_start(self, name):
         self.startState = name
 
-    def run_step(self, worldState):
+    def run_step(self, gameObject):
+        print('made it to run state')
+
         if self.currentState is None:
             self.currentState = self.startState
+
+        print('current state: ', self.currentState)
 
         try:
             handler = self.handlers[self.currentState]
@@ -25,7 +29,7 @@ class StateMachine:
             raise Exception("at least one state must be an end_state")
         
         # Perform State Action
-        newState = handler(state)
+        newState = handler(gameObject)
         
         if newState in self.endStates:
             print('reached end state for unit')

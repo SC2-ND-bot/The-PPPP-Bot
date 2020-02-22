@@ -14,11 +14,12 @@ class PPPP(sc2.BotAI):
     def __init__(self):
         self.path_coord_dict = {}
         self.working_locations = {}
-        self.agents = []
+        self.agents = {}
 
     def create_agent(self, unit):
         if unit.type_id == ADEPT:
-            self.agents.append(AdeptAgent(unit))
+            print('made adept agent')
+            self.agents[unit] = AdeptAgent(unit)
 
     async def on_step(self, iteration):
         if iteration == 0:
@@ -46,6 +47,7 @@ class PPPP(sc2.BotAI):
         for worker in self.workers:
             if worker.is_idle:
                 self.go_to_work(worker)
+        #####################################################################################################
 
         ######################################################################################################
 
@@ -69,9 +71,28 @@ class PPPP(sc2.BotAI):
             elif inst[1] == -1: # Research
                 if self.research(self.nodeContents):
                     self.buildTree.curr.executed = True
-        
+
         # Testing for GOAP
 
+        # for unit in self.units(ADEPT).ready:
+        #     if not self.agents.get(unit, False):
+        #         print('trying to create unit')
+        #         print(unit.type_id)
+        #         self.create_agent(unit)
+        #     else:
+        #         self.agents[unit].stateMachine.run_step(self)
+
+        # if self.units(ADEPT).amount < 1:
+        #     for gw in self.structures(GATEWAY).ready.idle:
+        #         if self.can_afford(ADEPT) and len(self.structures(CYBERNETICSCORE).ready) > 0:
+        #             self.do(gw.train(ADEPT), subtract_cost=True, subtract_supply=True)
+
+        # # If we have no pylon, build one at main base ramp
+        # if len(self.structures(PYLON)) < 1 and self.already_pending(PYLON) == 0:
+        #     worker = self.workers.random_or(None)
+        #     if self.can_afford(PYLON) and worker:
+        #         self.do(worker.build(UnitTypeId.PYLON,self.main_base_ramp.protoss_wall_pylon))
+        
         # for gw in self.structures(GATEWAY).ready.idle:
         #     print('trying to build adept step 1')
         #     if self.can_afford(ADEPT) and len(self.structures(CYBERNETICSCORE).ready) > 0:
@@ -115,13 +136,10 @@ class PPPP(sc2.BotAI):
         #             if not self.gas_buildings or not self.gas_buildings.closer_than(1, vg):
         #                 self.do(worker.build(ASSIMILATOR, vg), subtract_cost=True)
         #                 self.do(worker.stop(queue=True))
-
-        # # if self.can_afford()
-
-        # for nexus in self.structures(NEXUS):
             
-        #     # TODO: redistribute workers
-        #     # if nexus.surplus_harversters > 0:
+            # # TODO: redistribute workers
+            # if nexus.surplus_harvesters > 0:
+            #     await self.distribute_workers()
                 
         #     # TODO: This needs work
         #     if self.supply_workers + self.already_pending(PROBE) < self.townhalls.amount * 22 and nexus.is_idle:
@@ -194,7 +212,7 @@ def main():
     sc2.run_game(
         sc2.maps.get("AcropolisLE"),
         [Bot(Race.Protoss, PPPP(), name="The PPPP"), Computer(Race.Protoss, Difficulty.VeryEasy)],
-        realtime=True,
+        realtime=False,
     )
 
 if __name__ == "__main__":
