@@ -7,9 +7,8 @@ from sc2 import Race, Difficulty
 from sc2.constants import *
 from sc2.player import Bot, Computer
 from sc2.position import Point2, Point3
-from sc2.ids.unit_typeid import UnitTypeId
-from state_machine import StateMachine
-from agents.probe import ProbeAgent
+from FSM.state_machine import StateMachine
+from agents.adeptAgent import AdeptAgent
 
 class PPPP(sc2.BotAI):
     def __init__(self):
@@ -18,10 +17,8 @@ class PPPP(sc2.BotAI):
         self.agents = []
 
     def create_agent(self, unit):
-        if unit.type_id == PROBE:
-            newProbeAgent = ProbeAgent(unit)
-            self.agents.append(newProbeAgent)
-
+        if unit.type_id == ADEPT:
+            self.agents.append(AdeptAgent(unit))
 
     async def on_step(self, iteration):
         if iteration == 0:
@@ -52,21 +49,6 @@ class PPPP(sc2.BotAI):
 
         ######################################################################################################
 
-        # # If we have no pylon, build one near starting nexus
-        # if len(self.structures(PYLON)) < 1 and self.already_pending(PYLON) == 0:
-        #     if self.can_afford(PYLON):
-        #         await self.build(PYLON, near=self.main_base_ramp.protoss_wall_pylon)
-
-        # # Make probes until we have 16 in each base
-        # for nexus in nexuses:
-        #     if self.supply_workers < 19 and nexus.is_idle:
-        #         if self.can_afford(PROBE):
-        #             self.do(nexus.train(PROBE), subtract_cost=True, subtract_supply=True)
-        
-        # if self.supply_workers == 19 and len(self.structures(PYLON)) < 3 and self.already_pending(PYLON) == 0:
-        #     if self.can_afford(PYLON):
-        #         await self.build(PYLON, near=self.main_base_ramp.protoss_wall_pylon)
-
         # Logic for execution of build tree (Milestone 2)
         inst = self.buildTree.stepDown(self.minerals, self.vespene, self.supply_left, self.state)
         print(inst)
@@ -87,8 +69,75 @@ class PPPP(sc2.BotAI):
             elif inst[1] == -1: # Research
                 if self.research(self.nodeContents):
                     self.buildTree.curr.executed = True
+        
+        # Testing for GOAP
 
-        self.start_location
+        # for gw in self.structures(GATEWAY).ready.idle:
+        #     print('trying to build adept step 1')
+        #     if self.can_afford(ADEPT) and len(self.structures(CYBERNETICSCORE).ready) > 0:
+        #         print('trying to build adept step 2')
+        #         self.do(gw.train(ADEPT), subtract_cost=True, subtract_supply=True)
+
+        # # If we have no pylon, build one at main base ramp
+        # if len(self.structures(PYLON)) < 1 and self.already_pending(PYLON) == 0:
+        #     worker = self.workers.random_or(None)
+        #     if self.can_afford(PYLON) and worker:
+        #         self.do(worker.build(UnitTypeId.PYLON,self.main_base_ramp.protoss_wall_pylon))
+        
+        # # Once we have a pylon completed
+        # if self.structures(PYLON).ready:
+        #     pylon = self.structures(PYLON).ready.random
+        #     if self.structures(GATEWAY).ready:
+        #         # If we have gateway completed, build cyber core
+        #         if not self.structures(CYBERNETICSCORE):
+        #             if self.can_afford(CYBERNETICSCORE) and self.already_pending(CYBERNETICSCORE) == 0:
+        #                 cybernetics_wall_location = self.main_base_ramp.protoss_wall_buildings[1]
+        #                 await self.build(CYBERNETICSCORE, cybernetics_wall_location)
+        #     else:
+        #         # If we have no gateway, build gateway
+        #         gateway_wall_location = self.main_base_ramp.protoss_wall_buildings[0]
+        #         if self.can_afford(GATEWAY) and self.already_pending(GATEWAY) == 0:
+        #             await self.build(GATEWAY, gateway_wall_location)
+
+
+        #  # Build gas near completed nexuses once we have a cybercore (does not need to be completed
+        # if self.structures(CYBERNETICSCORE):
+        #     for nexus in self.townhalls.ready:
+        #         vgs = self.vespene_geyser.closer_than(15, nexus)
+        #         for vg in vgs:
+        #             if not self.can_afford(ASSIMILATOR):
+        #                 break
+
+        #             worker = self.select_build_worker(vg.position)
+        #             if worker is None:
+        #                 break
+
+        #             if not self.gas_buildings or not self.gas_buildings.closer_than(1, vg):
+        #                 self.do(worker.build(ASSIMILATOR, vg), subtract_cost=True)
+        #                 self.do(worker.stop(queue=True))
+
+        # # if self.can_afford()
+
+        # for nexus in self.structures(NEXUS):
+            
+        #     # TODO: redistribute workers
+        #     # if nexus.surplus_harversters > 0:
+                
+        #     # TODO: This needs work
+        #     if self.supply_workers + self.already_pending(PROBE) < self.townhalls.amount * 22 and nexus.is_idle:
+        #         if self.can_afford(PROBE):
+        #             self.do(nexus.train(PROBE), subtract_cost=True, subtract_supply=True)
+
+        #     # if self.supply_workers > 16 * self.townhalls.amount() and self.gas_buildings.ready < self.townhalls.amount() * 2:
+        #     #     closest_vespene_geysers = enemy_zerglings.closest_n_units(nexus, 2)
+
+        # if self.supply_left < 3 and self.already_pending(PYLON) == 0:
+        #     worker = self.workers.idle.random_or(None)
+        #     if self.can_afford(PYLON) and worker:
+        #         self.do(worker.build(UnitTypeId.PYLON,near=self.townhalls.ready.random_or(None)))
+
+        # self.build_protoss_ramp_wall()
+        # self.manage_worker_count()
 
     async def build_coord_dict(self):
         path_matrix = self.game_info.pathing_grid.data_numpy
@@ -144,8 +193,8 @@ class PPPP(sc2.BotAI):
 def main():
     sc2.run_game(
         sc2.maps.get("AcropolisLE"),
-        [Bot(Race.Protoss, PPPP(), name="CheeseCannon"), Computer(Race.Protoss, Difficulty.VeryEasy)],
-        realtime=False,
+        [Bot(Race.Protoss, PPPP(), name="The PPPP"), Computer(Race.Protoss, Difficulty.VeryEasy)],
+        realtime=True,
     )
 
 if __name__ == "__main__":

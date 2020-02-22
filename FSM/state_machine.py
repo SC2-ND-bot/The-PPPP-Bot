@@ -6,27 +6,26 @@ class StateMachine:
         self.currentState = None
 
     def add_state(self, name, handler, endState=False):
-        name = name.upper()
         self.handlers[name] = handler
         if end_state:
             self.endStates.append(name)
     
     def set_start(self, name):
-        self.startState = name.upper()
+        self.startState = name
 
-    def run_step(self, state):
+    def run_step(self, worldState):
         if self.currentState is None:
             self.currentState = self.startState
 
         try:
             handler = self.handlers[self.currentState]
         except:
-            raise InitializationError("must call .set_start() before .run_step()")
+            raise KeyError("must call .set_start() before .run_step()")
         if not self.endStates:
-            raise  InitializationError("at least one state must be an end_state")
+            raise Exception("at least one state must be an end_state")
         
-        
-        newState = handler(state).upper()
+        # Perform State Action
+        newState = handler(state)
         
         if newState in self.endStates:
             print('reached end state for unit')
