@@ -1,5 +1,7 @@
 from FSM.state_machine import StateMachine
 from FSM.states import AgentStates
+from goap_planner import GoapPlanner
+
 
 # TODO for @Hermes: create loadActions, DataProvider
 # TODO: figure out communication between game, FSM, and actions
@@ -12,17 +14,16 @@ class Agent:
 
         self.availableActions = []
         self.currentActions = []
+
+        self.planner = GoapPlanner()
+
         self.stateMachine.add_state("IDLE_STATE", self.idleStateHandler)
         self.stateMachine.add_state("PERFORM_ACTION_STATE", self.performActionStateHandler)
         self.stateMachine.add_state("END_STATE", self.endStateHandler, True)
-
         self.stateMachine.set_start("IDLE_STATE")
 
         # TODO: Create DataProvider which feeds the agents goals and state information
         # self.dataProvider = DataProvider()
-
-        # TODO: Define AgentPlanner class
-        # self.planner = AgentPlanner()
 
     def idleStateHandler(self, gameObject):
         # TODO: getGoal() should return a key:string -> value:boolean pair
@@ -65,7 +66,8 @@ class Agent:
     def hasActivePlan(self, gameObject):
         return len(self.currentActions) > 0
 
-    # def loadActions(self):
+    def loadActions(self):
+        raise NotImplementedError
 
     # # Still unsure if we require this state and handler
     def endStateHandler(self):

@@ -1,11 +1,13 @@
 
-
 class Action:
     def  __init__(self):
         self.cost = 1
         self.gameObject = None
         self.preconditions = {}
         self.effects = {}
+
+        self.agent = None
+        self.gameObject = None
 
     def doReset(self):
         self.target = None
