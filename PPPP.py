@@ -1,11 +1,13 @@
 import random
-
-import sc2
-from sc2 import Race, Difficulty
 import math
+import sc2
+from buildOrder import buildtreeNode
+from buildOrder import buildOrder
+from sc2 import Race, Difficulty
 from sc2.constants import *
 from sc2.player import Bot, Computer
 from sc2.position import Point2, Point3
+from sc2.ids.unit_typeid import UnitTypeId
 
 class PPPP(sc2.BotAI):
     def __init__(self):
@@ -14,8 +16,9 @@ class PPPP(sc2.BotAI):
 
     async def on_step(self, iteration):
         if iteration == 0:
-            await self.chat_send("(probe)(pylon)(cannon)(cannon)(gg)")
+            # await self.chat_send("(probe)(pylon)(cannon)(cannon)(gg)")
             await self.build_coord_dict()
+            self.buildTree = buildOrder(self.game_data)
         
         bases = self.townhalls.ready
         gas_buildings = self.gas_buildings.ready
@@ -24,37 +27,56 @@ class PPPP(sc2.BotAI):
             y_coord = math.floor(resource.position.y)
             self.working_locations[(x_coord, y_coord)] = resource
 
-        if not self.townhalls:
-            # Attack with all workers if we don't have any nexuses left, attack-move on enemy spawn (doesn't work on 4 player map) so that probes auto attack on the way
-            for worker in self.workers:
-                self.do(worker.attack(self.enemy_start_locations[0]))
-            return
+        # if not self.townhalls:
+        #     # Attack with all workers if we don't have any nexuses left, attack-move on enemy spawn (doesn't work on 4 player map) so that probes auto attack on the way
+        #     for worker in self.workers:
+        #         self.do(worker.attack(self.enemy_start_locations[0]))
+        #     return
 
         nexuses = self.structures(NEXUS)
         
-        ################# This is the logic relevant for milestone 1 #################
-        
+        # Logic for returning idle workers to work (Milestone 1)
         for worker in self.workers:
             if worker.is_idle:
                 self.go_to_work(worker)
 
         ######################################################################################################
 
-        # If we have no pylon, build one near starting nexus
-        if len(self.structures(PYLON)) < 1 and self.already_pending(PYLON) == 0:
-            if self.can_afford(PYLON):
-                await self.build(PYLON, near=self.main_base_ramp.protoss_wall_pylon)
+        # # If we have no pylon, build one near starting nexus
+        # if len(self.structures(PYLON)) < 1 and self.already_pending(PYLON) == 0:
+        #     if self.can_afford(PYLON):
+        #         await self.build(PYLON, near=self.main_base_ramp.protoss_wall_pylon)
 
-        # Make probes until we have 16 in each base
-        for nexus in nexuses:
-            if self.supply_workers < 19 and nexus.is_idle:
-                if self.can_afford(PROBE):
-                    self.do(nexus.train(PROBE), subtract_cost=True, subtract_supply=True)
+        # # Make probes until we have 16 in each base
+        # for nexus in nexuses:
+        #     if self.supply_workers < 19 and nexus.is_idle:
+        #         if self.can_afford(PROBE):
+        #             self.do(nexus.train(PROBE), subtract_cost=True, subtract_supply=True)
         
-        if self.supply_workers == 19 and len(self.structures(PYLON)) < 3 and self.already_pending(PYLON) == 0:
-            if self.can_afford(PYLON):
-                await self.build(PYLON, near=self.main_base_ramp.protoss_wall_pylon)
+        # if self.supply_workers == 19 and len(self.structures(PYLON)) < 3 and self.already_pending(PYLON) == 0:
+        #     if self.can_afford(PYLON):
+        #         await self.build(PYLON, near=self.main_base_ramp.protoss_wall_pylon)
 
+        # Logic for execution of build tree (Milestone 2)
+        inst = self.buildTree.stepDown(self.minerals, self.vespene, self.supply_left, self.state)
+        print(inst)
+        if inst != None:
+            if inst[1] == 0: # A unit
+                if inst[0] == UnitTypeId.PROBE:
+                    nexus = random.choice(nexuses)
+                    if self.do(nexus.train(PROBE), subtract_cost=True, subtract_supply=True):
+                        self.buildTree.curr.executed = True
+                else:    
+                    if self.train(inst[0]):
+                        self.buildTree.curr.executed = True
+            elif inst[1] == 1: # A building
+                map_center = self.game_info.map_center
+                position_towards_map_center = self.start_location.towards(map_center, distance=random.randint(0, 15))
+                if await self.build(inst[0], near=position_towards_map_center, placement_step=1):
+                    self.buildTree.curr.executed = True
+            elif inst[1] == -1: # Research
+                if self.research(self.nodeContents):
+                    self.buildTree.curr.executed = True
 
     async def build_coord_dict(self):
         path_matrix = self.game_info.pathing_grid.data_numpy
@@ -110,9 +132,8 @@ def main():
     sc2.run_game(
         sc2.maps.get("AcropolisLE"),
         [Bot(Race.Protoss, PPPP(), name="CheeseCannon"), Computer(Race.Protoss, Difficulty.VeryEasy)],
-        realtime=True,
+        realtime=False,
     )
-
 
 if __name__ == "__main__":
     main()
