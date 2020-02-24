@@ -6,71 +6,71 @@ from FSM.states import AgentStates
 
 class Agent:
 
-    def __init__(self, unit, worldState):
-        self.unit = unit
+	def __init__(self, unit, worldState):
+		self.unit = unit
 		self.worldState = worldState
-        self.stateMachine = StateMachine()
+		self.stateMachine = StateMachine()
 
-        self.availableActions = []
-        self.currentActions = []
-        self.stateMachine.add_state("IDLE_STATE", self.idleStateHandler)
-        self.stateMachine.add_state("PERFORM_ACTION_STATE", self.performActionStateHandler)
-        self.stateMachine.add_state("END_STATE", self.endStateHandler, True)
+		self.availableActions = []
+		self.currentActions = []
+		self.stateMachine.add_state("IDLE_STATE", self.idleStateHandler)
+		self.stateMachine.add_state("PERFORM_ACTION_STATE", self.performActionStateHandler)
+		self.stateMachine.add_state("END_STATE", self.endStateHandler, True)
 
-        self.stateMachine.set_start("IDLE_STATE")
+		self.stateMachine.set_start("IDLE_STATE")
 
-        # TODO: Create DataProvider which feeds the agents goals and state information
-        # self.dataProvider = DataProvider()
+		# TODO: Create DataProvider which feeds the agents goals and state information
+		# self.dataProvider = DataProvider()
 
-        # TODO: Define AgentPlanner class
-        # self.planner = AgentPlanner()
+		# TODO: Define AgentPlanner class
+		# self.planner = AgentPlanner()
 
-    def idleStateHandler(self, gameObject):
-        # TODO: getGoal() should return a key:string -> value:boolean pair
-        print('in idle state')
-        # goal = self.dataProvider.getGoal()
-        goal = ('DISRUPT_ENEMY_ECONOMY', True)
+	def idleStateHandler(self, gameObject):
+		# TODO: getGoal() should return a key:string -> value:boolean pair
+		print('in idle state')
+		# goal = self.dataProvider.getGoal()
+		goal = ('DISRUPT_ENEMY_ECONOMY', True)
 
-        # TODO: Should return all relevant world information 
-        # worldState = self.dataProvider.getWorldState()
-        worldState = None
+		# TODO: Should return all relevant world information 
+		# worldState = self.dataProvider.getWorldState()
+		worldState = None
 
-        # agent, actions, state, goal
-        plan = self.planner.plan(self, self.availableActions, worldState, goal)
+		# agent, actions, state, goal
+		plan = self.planner.plan(self, self.availableActions, worldState, goal)
 
-        if plan is not None:
-            self.currentActions = plan
-            return "PERFORM_ACTION_STATE"
-        else:
-            print('No valid plan found, agent will remain idle')
-            return "IDLE_STATE"
+		if plan is not None:
+			self.currentActions = plan
+			return "PERFORM_ACTION_STATE"
+		else:
+			print('No valid plan found, agent will remain idle')
+			return "IDLE_STATE"
 
-    def performActionStateHandler(self, gameObject):
-        if not self.hasActivePlan():
-            return "IDLE_STATE"
+	def performActionStateHandler(self, gameObject):
+		if not self.hasActivePlan():
+			return "IDLE_STATE"
 
-        action = self.currentActions[0]
-        if action.isFinished():
-            self.currentActions.pop(0)
+		action = self.currentActions[0]
+		if action.isFinished():
+			self.currentActions.pop(0)
 
-        if self.hasActivePlan():
-            newAction = self.currentActions[0]
-            success = newAction.perform()
+		if self.hasActivePlan():
+			newAction = self.currentActions[0]
+			success = newAction.perform()
 
-            if not success:
-                print('Action failed, going back to idle state')
-                return "IDLE_STATE"
-                
-            return "PERFORM_ACTION_STATE"
+			if not success:
+				print('Action failed, going back to idle state')
+				return "IDLE_STATE"
+				
+			return "PERFORM_ACTION_STATE"
 
-    def hasActivePlan(self, gameObject):
-        return len(self.currentActions) > 0
+	def hasActivePlan(self, gameObject):
+		return len(self.currentActions) > 0
 
-    # def loadActions(self):
+	# def loadActions(self):
 
-    # # Still unsure if we require this state and handler
-    def endStateHandler(self):
-        print('reached end state')
+	# # Still unsure if we require this state and handler
+	def endStateHandler(self):
+		print('reached end state')
 
 	def updateWorldState(worldState):
 		self.worldState = worldState
