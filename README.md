@@ -13,6 +13,8 @@ After installation, you can run the bot in a test game by running `make test`.
 
 Finally, to clean up and remove dependencies you can run `make clean`.
 
+You can also attempt to build the entire environment by executing `make build`.  This will still required your interaction because you will need to sign into your Blizzard account.
+
 ## High Level Strategy
 
 This bot will implement a strategy which involves storing a wide vareity of possible build orders (gathered from examples by professional human players) and executing these build orders according to their projected effectiveness.  Right now only a simple, short build order is implemented in the code.  As time goes on this order will be replaced with more effective ones and a full tree will be constructed.
