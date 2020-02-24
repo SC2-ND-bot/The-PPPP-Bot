@@ -25,7 +25,18 @@ Our bot utilizes two control mechanisms to strategically pursue victory:
 
 The first is a behavior tree which implements the build orders discussed above.  The tree is implemented using two additional classes, buildtreeNode and buildOrder.  The node class contains functionality which allows for the evaluation and execution of training units, building buildings, or conducting research.  Each node represents a singular action and the conditions that must be met for it to be undertaken.  The buildOrder class constructs all of the nodes at the beginning of the game and handles stepping through the tree.  After a node is executed, this class evaluates which branch to take to move further down an optimal build order.  Decisions on which buildOrder to pursue down the tree can be made on a variety of factors including enemy race, enemy units on the map, game duration, resources available, and others.
 
-The second is **WRITE G.O.A.P. DESCRIPTION HERE**
+The second is a Goal Orientied Action Planner, which is in charge of controlling units at a micro scale. It does so by utilizing four main pieces. 
+
+1. Agents:
+Each agent is in of defining their FSM and triggering each 'tick', as well as determining what actions it has available to perform.
+2. Planner:
+Determines what sequence of actions it has to perform in order to meet the goal and determines what goal each agent should complete (this is yet to be implemented)
+3. Actions:
+ Allow the planner to determine which sequence of actions to create by providing a list of preconditions and effects, as well as a cost associated with the action. It also includes the finer details of how the bot will execute each action.
+4. Finite State Machine:
+The FSM will place each agent into either an idle or a performAction state where it can calculate upcoming goals/plans or execture specific actions respectively.
+
+A lot of the unit specific work related to the GOAP is yet to be implemented, however the groundwork has been established so that now unit specific code can be written modularly.
 
 ## Dependancies
 
