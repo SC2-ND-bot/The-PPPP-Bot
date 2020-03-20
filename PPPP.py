@@ -9,6 +9,7 @@ from sc2.player import Bot, Computer
 from sc2.position import Point2, Point3
 from FSM.state_machine import StateMachine
 from agents.adeptAgent import AdeptAgent
+from goapPlanner import GoapPlanner
 
 class PPPP(sc2.BotAI):
 	def __init__(self):
@@ -17,21 +18,20 @@ class PPPP(sc2.BotAI):
 		self.agents = {}
 		self.world_state = {}
 		self.nexus_construct_time = 0
+		self.planner = GoapPlanner()
 
 	def create_agent(self, unit):
 		if unit.type_id == ADEPT:
 			print('made adept agent')
-			self.agents[unit] = AdeptAgent(unit, self.world_state)
+			self.agents[unit] = AdeptAgent(unit, self, self.planner)
 
 	async def on_step(self, iteration):
 		if iteration == 0:
-			# await self.chat_send("(probe)(pylon)(cannon)(cannon)(gg)")
+			await self.chat_send("(probe)(pylon)(cannon)(cannon)(gg)")
 			await self.build_coord_dict()
 			self.buildTree = buildOrder(self.game_data, self.enemy_race)
-		
 		bases = self.townhalls.ready
 		gas_buildings = self.gas_buildings.ready
-		
 		for resource in bases | gas_buildings:
 			x_coord = math.floor(resource.position.x)
 			y_coord = math.floor(resource.position.y)
@@ -42,7 +42,7 @@ class PPPP(sc2.BotAI):
 		#	  for worker in self.workers:
 		#		  self.do(worker.attack(self.enemy_start_locations[0]))
 		#	  return
-		
+
 		# Logic for returning idle workers to work (Milestone 1)
 		for worker in self.workers:
 			if worker.is_idle:
@@ -61,7 +61,7 @@ class PPPP(sc2.BotAI):
 					nexus = random.choice(self.townhalls)
 					if self.do(nexus.train(PROBE), subtract_cost=True, subtract_supply=True):
 						self.buildTree.curr.executed = True
-				else:	 
+				else:
 					if self.train(inst[0]):
 						self.buildTree.curr.executed = True
 			elif inst[1] == 1: # A building
@@ -123,7 +123,7 @@ class PPPP(sc2.BotAI):
 		#	  worker = self.workers.random_or(None)
 		#	  if self.can_afford(PYLON) and worker:
 		#		  self.do(worker.build(UnitTypeId.PYLON,self.main_base_ramp.protoss_wall_pylon))
-		
+
 		# for gw in self.structures(GATEWAY).ready.idle:
 		#	  print('trying to build adept step 1')
 		#	  if self.can_afford(ADEPT) and len(self.structures(CYBERNETICSCORE).ready) > 0:
@@ -135,7 +135,7 @@ class PPPP(sc2.BotAI):
 		#	  worker = self.workers.random_or(None)
 		#	  if self.can_afford(PYLON) and worker:
 		#		  self.do(worker.build(UnitTypeId.PYLON,self.main_base_ramp.protoss_wall_pylon))
-		
+
 		# # Once we have a pylon completed
 		# if self.structures(PYLON).ready:
 		#	  pylon = self.structures(PYLON).ready.random
@@ -167,11 +167,11 @@ class PPPP(sc2.BotAI):
 		#			  if not self.gas_buildings or not self.gas_buildings.closer_than(1, vg):
 		#				  self.do(worker.build(ASSIMILATOR, vg), subtract_cost=True)
 		#				  self.do(worker.stop(queue=True))
-			
+
 			# # TODO: redistribute workers
 			# if nexus.surplus_harvesters > 0:
 			#	  await self.distribute_workers()
-				
+
 		#	  # TODO: This needs work
 		#	  if self.supply_workers + self.already_pending(PROBE) < self.townhalls.amount * 22 and nexus.is_idle:
 		#		  if self.can_afford(PROBE):
@@ -191,7 +191,7 @@ class PPPP(sc2.BotAI):
 	async def build_coord_dict(self):
 		path_matrix = self.game_info.pathing_grid.data_numpy
 		mheight = len(path_matrix)
-		mwidth = len(path_matrix[1])		
+		mwidth = len(path_matrix[1])
 		for i in range(0, mheight):
 			for j in range(0, mwidth):
 				if path_matrix[i,j] == 1:
@@ -223,7 +223,7 @@ class PPPP(sc2.BotAI):
 		self.world_state['vespene_geyser'] = self.vespene_geyser # All vespene fields, even those that have a gas building on them
 		self.world_state['expansion_locations'] = self.expansion_locations # Locations of possible expansions
 		self.world_state['destructables'] = self.destructables # All destructable rocks (except the platforms below the main base ramp)
-		
+
 
 	def go_to_work(self, worker):
 		x_coord = math.floor(worker.position.x)
@@ -253,11 +253,11 @@ class PPPP(sc2.BotAI):
 					if self.working_locations.get(neighbor) is not None:
 						working_location = self.working_locations[neighbor]
 						is_not_full = working_location.surplus_harvesters <= 0
-						
+
 						# if is_not_full:
 						#	  return working_location
 						return working_location
-						
+
 					visited.append(neighbor)
 					queue.append(neighbor)
 		return None

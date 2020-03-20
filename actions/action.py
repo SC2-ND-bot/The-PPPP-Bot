@@ -15,21 +15,19 @@ class Action:
     def reset(self):
         raise NotImplementedError
 
-    def checkProceduralPrecondition(self):
+    def checkProceduralPrecondition(self, agent):
         raise NotImplementedError
 
     def isDone(self):
         raise NotImplementedError
 
-    def perform(self):
+    def perform(self, firstAction):
         raise NotImplementedError
-    
+
     # def addPrecondition(preconditionName, value):
     #     self.preconditions[preconditionName] = value
-    
+
     # def removePrecondition(preconditionName):
     #     del self.preconditions[preconditionName]
 
     # def addEffect(effectName, value)
-
-    
