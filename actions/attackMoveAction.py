@@ -2,37 +2,32 @@ from actions.action import Action
 
 class AttackMoveAction(Action):
 	def __init__(self, agent, gameObject):
-		# add preconditions
-		# add effects
+		super().__init__()
 
 		self.agent = agent
 		self.gameObject = gameObject
-		self.cost = calcCost()
+		self.cost = 1
 		self.attackLocation = None
-		self.moving = False
-		
-		addPrecondition("can_attack", True)
-		addPrecondition("is_active", False)
 
-	#def calcCost(self):
-		# determine the cost for this action
-		# will be used during planning
+		# self.preconditions["attackingArea"] = False
+		self.effects["attackingArea"] = True
+		self.effects["movingTowardsEnemy"] = True
+
+	def __repr__(self):
+		return "Attack Move Action Class"
+
+	# def calcCost(self):
+	# 	# determine the cost for this action
+	# 	# will be used during planning
 
 	def reset(self):
 		self.attackLocation = None
-		self.moving = False
 
-	def canBeInterrupted(self):
-		return True
-
-	def checkProceduralPrecondition(self):
+	def checkProceduralPrecondition(self, agent):
 		# This should generate a valid attackLocation
 		attackLocation = self.gameObject.enemy_start_locations[0]
 		self.attackLocation = attackLocation
+		return True
 
-	def isDone(self):
-		return not self.moving
-
-	def perform(self):
-		self.gameObject.do(self.agent.attack(self.attackLocation))
-		#self.agent.is_moving
+	def perform(self, firstAction):
+		self.gameObject.do(self.agent.unit.attack(self.attackLocation, not firstAction))
