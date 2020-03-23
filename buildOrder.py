@@ -1,10 +1,12 @@
 import random
+import json
 import sc2
-from sc2.ids.unit_typeid import UnitTypeId
 from sc2 import Race
+from sc2.ids.unit_typeid import UnitTypeId
+from sc2.ids.upgrade_id import UpgradeId
 
 class buildtreeNode(sc2.BotAI):
-    def __init__(self, contents, utype, utime, conditions, children, gameData):
+    def __init__(self, contents, utype, utime, conditions, children, gameData, enemy_race):
         self.nodeContents = contents
         self.nodeType = utype # 0 is a unit, 1 is a building, and -1 is research
         self.reqTime = utime
@@ -12,6 +14,7 @@ class buildtreeNode(sc2.BotAI):
         self.children = children
         self.executed = False
         self.race = Race.Protoss
+        self.enemyRace = enemy_race
         self._game_data = gameData
         self.minerals = 0
         self.vespene = 0
@@ -34,26 +37,29 @@ class buildtreeNode(sc2.BotAI):
             if self.time < self.reqTime:
                 return False
         for condition in self.conditions:
-            if not condition:
-                return False
+            if condition[0] == "race":
+                if Race(condition[1]) != self.enemyRace and self.enemyRace != Race.Random:
+                    return False
         return True
 
 class buildOrder(sc2.BotAI):
-    def __init__(self, gameData):
-        self.l12 = buildtreeNode(UnitTypeId.ZEALOT, 0, 0, [True], [], gameData)
-        self.l11 = buildtreeNode(UnitTypeId.ZEALOT, 0, 0, [True], [self.l12], gameData)
-        self.l10 = buildtreeNode(UnitTypeId.ZEALOT, 0, 0, [True], [self.l11], gameData)
-        self.l9 = buildtreeNode(UnitTypeId.ZEALOT, 0, 0, [True], [self.l10], gameData)
-        self.l8_2 = buildtreeNode(UnitTypeId.GATEWAY, 1, 0, [True], [self.l9], gameData)
-        self.l8_1 = buildtreeNode(UnitTypeId.ZEALOT, 0, 0, [False], [self.l9], gameData)
-        self.l7 = buildtreeNode(UnitTypeId.ZEALOT, 0, 0, [True], [self.l8_1, self.l8_2], gameData) # See here for tree branching example
-        self.l6 = buildtreeNode(UnitTypeId.GATEWAY, 1, 0, [True], [self.l7], gameData)
-        self.l5 = buildtreeNode(UnitTypeId.PYLON, 1, 0, [True], [self.l6], gameData)
-        self.l4 = buildtreeNode(UnitTypeId.PYLON, 1, 0, [True], [self.l5], gameData)
-        self.l3 = buildtreeNode(UnitTypeId.PROBE, 0, 0, [True], [self.l4], gameData)
-        self.l2 = buildtreeNode(UnitTypeId.PROBE, 0, 0, [True], [self.l3], gameData)
-        self.l1 = buildtreeNode(UnitTypeId.PROBE, 0, 0, [True], [self.l2], gameData)
-        self.curr = self.l1
+    def __init__(self, gameData, enemy_race):
+        self.tree = self.constructTree(gameData, enemy_race)
+        self.curr = self.tree
+    
+    def constructTree(self, gameData, enemy_race):
+        with open('buildOrder.json', 'r') as f:
+            treeJSON = json.load(f)["buildOrder"]
+            root = self.constructNode(treeJSON, treeJSON["l0"], gameData, enemy_race)
+        return root
+        
+    def constructNode(self, treeJSON, nodeJSON, gameData, enemy_race):
+        children = []
+        for child in nodeJSON["children"]:
+            children.append(self.constructNode(treeJSON, treeJSON[child], gameData, enemy_race))
+        if nodeJSON["type"] == -1:
+            return buildtreeNode(UpgradeId(nodeJSON["contents"]), nodeJSON["type"], nodeJSON["time"], nodeJSON["conditions"], children, gameData, enemy_race)
+        return buildtreeNode(UnitTypeId(nodeJSON["contents"]), nodeJSON["type"], nodeJSON["time"], nodeJSON["conditions"], children, gameData, enemy_race)
 
     def stepDown(self, minerals, vespene, supply_left, state):
         result = None
