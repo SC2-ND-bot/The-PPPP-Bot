@@ -16,6 +16,7 @@ class PPPP(sc2.BotAI):
 		self.working_locations = {}
 		self.agents = {}
 		self.world_state = {}
+		self.nexus_construct_time = 0
 
 	def create_agent(self, unit):
 		if unit.type_id == ADEPT:
@@ -26,7 +27,7 @@ class PPPP(sc2.BotAI):
 		if iteration == 0:
 			# await self.chat_send("(probe)(pylon)(cannon)(cannon)(gg)")
 			await self.build_coord_dict()
-			self.buildTree = buildOrder(self.game_data)
+			self.buildTree = buildOrder(self.game_data, self.enemy_race)
 		
 		bases = self.townhalls.ready
 		gas_buildings = self.gas_buildings.ready
@@ -41,8 +42,6 @@ class PPPP(sc2.BotAI):
 		#	  for worker in self.workers:
 		#		  self.do(worker.attack(self.enemy_start_locations[0]))
 		#	  return
-
-		nexuses = self.structures(NEXUS)
 		
 		# Logic for returning idle workers to work (Milestone 1)
 		for worker in self.workers:
@@ -53,25 +52,54 @@ class PPPP(sc2.BotAI):
 		######################################################################################################
 
 		# Logic for execution of build tree (Milestone 2)
+		map_center = self.game_info.map_center
+		position_towards_map_center = self.start_location.towards(map_center, distance=random.randint(0, 15))
 		inst = self.buildTree.stepDown(self.minerals, self.vespene, self.supply_left, self.state)
-		# print(inst)
 		if inst != None:
 			if inst[1] == 0: # A unit
 				if inst[0] == UnitTypeId.PROBE:
-					nexus = random.choice(nexuses)
+					nexus = random.choice(self.townhalls)
 					if self.do(nexus.train(PROBE), subtract_cost=True, subtract_supply=True):
 						self.buildTree.curr.executed = True
 				else:	 
 					if self.train(inst[0]):
 						self.buildTree.curr.executed = True
 			elif inst[1] == 1: # A building
-				map_center = self.game_info.map_center
-				position_towards_map_center = self.start_location.towards(map_center, distance=random.randint(0, 15))
-				if await self.build(inst[0], near=position_towards_map_center, placement_step=1):
-					self.buildTree.curr.executed = True
+				if self.tech_requirement_progress(inst[0]) >= 1:
+					if await self.build(inst[0], near=position_towards_map_center, placement_step=1):
+						self.buildTree.curr.executed = True
 			elif inst[1] == -1: # Research
-				if self.research(self.nodeContents):
+				if self.research(inst[0]):
 					self.buildTree.curr.executed = True
+
+		# Logic for execution of economy FSM (Milestone 3)
+		if self.supply_left <= 3 and self.already_pending(UnitTypeId.PYLON) == 0:
+			await self.build(UnitTypeId.PYLON, near=position_towards_map_center, placement_step=1)
+		if self.supply_workers < len(self.townhalls) * 25 and self.supply_left > 5 and self.already_pending(UnitTypeId.PROBE) == 0:
+			nexus = random.choice(self.townhalls)
+			self.do(nexus.train(UnitTypeId.PROBE), subtract_cost=True, subtract_supply=True)
+		for ass in self.gas_buildings:
+			if (ass.assigned_harvesters < 1 or (ass.assigned_harvesters < 3 and self.time > 180)) and self.already_pending(UnitTypeId.ASSIMILATOR) == 0 and self.already_pending(UnitTypeId.NEXUS) == 0:
+				worker = self.select_build_worker(position_towards_map_center)
+				self.do(worker.gather(ass))
+		for nexus in self.townhalls:
+			geysers = self.vespene_geyser.closer_than(15, nexus)
+			for geyser in geysers:
+				if not self.gas_buildings.closer_than(1, geyser):
+					if not self.can_afford(UnitTypeId.ASSIMILATOR):
+						break
+					worker = self.select_build_worker(geyser.position)
+					if worker is None:
+						break
+					if not self.gas_buildings or not self.gas_buildings.closer_than(1, geyser):
+						self.do(worker.build(UnitTypeId.ASSIMILATOR, geyser), subtract_cost=True)
+						self.do(worker.stop(queue=True))
+						self.distribute_workers()
+		if self.time > self.nexus_construct_time + 180 and len(self.townhalls) < 4:
+			exp = await self.get_next_expansion()
+			await self.build(UnitTypeId.NEXUS, exp)
+			self.nexus_construct_time = self.time
+			await self.distribute_workers()
 
 		# Testing for GOAP
 
@@ -237,7 +265,7 @@ class PPPP(sc2.BotAI):
 def main():
 	sc2.run_game(
 		sc2.maps.get("AcropolisLE"),
-		[Bot(Race.Protoss, PPPP(), name="The PPPP"), Computer(Race.Protoss, Difficulty.VeryEasy)],
+		[Bot(Race.Protoss, PPPP(), name="The PPPP"), Computer(Race.Zerg, Difficulty.VeryEasy)],
 		realtime=False,
 	)
 
