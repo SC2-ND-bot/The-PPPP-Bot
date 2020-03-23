@@ -17,7 +17,7 @@ You can also attempt to build the entire environment by executing `make build`. 
 
 ## High Level Strategy
 
-This bot will implement a strategy which involves storing a wide vareity of possible build orders (gathered from examples by professional human players) and executing these build orders according to their projected effectiveness.  Right now only a simple, short build order is implemented in the code.  As time goes on this order will be replaced with more effective ones and a full tree will be constructed.
+This bot will implement a strategy which involves storing a wide vareity of possible build orders (gathered from examples by professional human players) and executing these build orders according to their projected effectiveness.  Right now a build order is implemented in the code for competition against a Zerg opponent.  As time goes on this order will be replaced with more effective ones and a full tree will be constructed.
 
 ## Control Mechanisms and Functionality
 
@@ -25,7 +25,9 @@ Our bot utilizes two control mechanisms to strategically pursue victory:
 
 The first is a behavior tree which implements the build orders discussed above.  The tree is implemented using two additional classes, buildtreeNode and buildOrder.  The node class contains functionality which allows for the evaluation and execution of training units, building buildings, or conducting research.  Each node represents a singular action and the conditions that must be met for it to be undertaken.  The buildOrder class constructs all of the nodes at the beginning of the game and handles stepping through the tree.  After a node is executed, this class evaluates which branch to take to move further down an optimal build order.  Decisions on which buildOrder to pursue down the tree can be made on a variety of factors including enemy race, enemy units on the map, game duration, resources available, and others.
 
-The second is a Goal Orientied Action Planner, which is in charge of controlling units at a micro scale. It does so by utilizing four main pieces. 
+The second is a finite state machine which manages the bot's econonmy.  It dynamically evaluates the game state to determien when to build probes, assimilators, expansions, and pylons.  It also works to properly distribute workers in order to maintain the optimal ratio of mineral to gas resource gathering.
+
+The third is a Goal Orientied Action Planner, which is in charge of controlling units at a micro scale. It does so by utilizing four main pieces. 
 
 1. Agents:
 Each agent is in of defining their FSM and triggering each 'tick', as well as determining what actions it has available to perform.
