@@ -37,17 +37,20 @@ class PPPP(sc2.BotAI):
 			y_coord = math.floor(resource.position.y)
 			self.working_locations[(x_coord, y_coord)] = resource
 
-		# if not self.townhalls:
-		#	  # Attack with all workers if we don't have any nexuses left, attack-move on enemy spawn (doesn't work on 4 player map) so that probes auto attack on the way
-		#	  for worker in self.workers:
-		#		  self.do(worker.attack(self.enemy_start_locations[0]))
-		#	  return
-
 		# Logic for returning idle workers to work (Milestone 1)
 		for worker in self.workers:
 			if worker.is_idle:
 				self.go_to_work(worker)
 		#####################################################################################################
+
+		# Creates and Manages agents (Milestone 2 & 3)
+		for unit in self.units(ADEPT).ready:
+			if not self.agents.get(unit, False):
+				print('trying to create unit')
+				print(unit.type_id)
+				self.create_agent(unit)
+			else:
+				self.agents[unit].stateMachine.run_step(self)
 
 		######################################################################################################
 
@@ -100,93 +103,6 @@ class PPPP(sc2.BotAI):
 			await self.build(UnitTypeId.NEXUS, exp)
 			self.nexus_construct_time = self.time
 			await self.distribute_workers()
-
-		# Testing for GOAP
-
-		#  build_worldState_dict()
-
-		# for unit in self.units(ADEPT).ready:
-		#	  if not self.agents.get(unit, False):
-		#		  print('trying to create unit')
-		#		  print(unit.type_id)
-		#		  self.create_agent(unit)
-		#	  else:
-		#		  self.agents[unit].stateMachine.run_step(self)
-
-		# if self.units(ADEPT).amount < 1:
-		#	  for gw in self.structures(GATEWAY).ready.idle:
-		#		  if self.can_afford(ADEPT) and len(self.structures(CYBERNETICSCORE).ready) > 0:
-		#			  self.do(gw.train(ADEPT), subtract_cost=True, subtract_supply=True)
-
-		# # If we have no pylon, build one at main base ramp
-		# if len(self.structures(PYLON)) < 1 and self.already_pending(PYLON) == 0:
-		#	  worker = self.workers.random_or(None)
-		#	  if self.can_afford(PYLON) and worker:
-		#		  self.do(worker.build(UnitTypeId.PYLON,self.main_base_ramp.protoss_wall_pylon))
-
-		# for gw in self.structures(GATEWAY).ready.idle:
-		#	  print('trying to build adept step 1')
-		#	  if self.can_afford(ADEPT) and len(self.structures(CYBERNETICSCORE).ready) > 0:
-		#		  print('trying to build adept step 2')
-		#		  self.do(gw.train(ADEPT), subtract_cost=True, subtract_supply=True)
-
-		# # If we have no pylon, build one at main base ramp
-		# if len(self.structures(PYLON)) < 1 and self.already_pending(PYLON) == 0:
-		#	  worker = self.workers.random_or(None)
-		#	  if self.can_afford(PYLON) and worker:
-		#		  self.do(worker.build(UnitTypeId.PYLON,self.main_base_ramp.protoss_wall_pylon))
-
-		# # Once we have a pylon completed
-		# if self.structures(PYLON).ready:
-		#	  pylon = self.structures(PYLON).ready.random
-		#	  if self.structures(GATEWAY).ready:
-		#		  # If we have gateway completed, build cyber core
-		#		  if not self.structures(CYBERNETICSCORE):
-		#			  if self.can_afford(CYBERNETICSCORE) and self.already_pending(CYBERNETICSCORE) == 0:
-		#				  cybernetics_wall_location = self.main_base_ramp.protoss_wall_buildings[1]
-		#				  await self.build(CYBERNETICSCORE, cybernetics_wall_location)
-		#	  else:
-		#		  # If we have no gateway, build gateway
-		#		  gateway_wall_location = self.main_base_ramp.protoss_wall_buildings[0]
-		#		  if self.can_afford(GATEWAY) and self.already_pending(GATEWAY) == 0:
-		#			  await self.build(GATEWAY, gateway_wall_location)
-
-
-		#  # Build gas near completed nexuses once we have a cybercore (does not need to be completed
-		# if self.structures(CYBERNETICSCORE):
-		#	  for nexus in self.townhalls.ready:
-		#		  vgs = self.vespene_geyser.closer_than(15, nexus)
-		#		  for vg in vgs:
-		#			  if not self.can_afford(ASSIMILATOR):
-		#				  break
-
-		#			  worker = self.select_build_worker(vg.position)
-		#			  if worker is None:
-		#				  break
-
-		#			  if not self.gas_buildings or not self.gas_buildings.closer_than(1, vg):
-		#				  self.do(worker.build(ASSIMILATOR, vg), subtract_cost=True)
-		#				  self.do(worker.stop(queue=True))
-
-			# # TODO: redistribute workers
-			# if nexus.surplus_harvesters > 0:
-			#	  await self.distribute_workers()
-
-		#	  # TODO: This needs work
-		#	  if self.supply_workers + self.already_pending(PROBE) < self.townhalls.amount * 22 and nexus.is_idle:
-		#		  if self.can_afford(PROBE):
-		#			  self.do(nexus.train(PROBE), subtract_cost=True, subtract_supply=True)
-
-		#	  # if self.supply_workers > 16 * self.townhalls.amount() and self.gas_buildings.ready < self.townhalls.amount() * 2:
-		#	  #		closest_vespene_geysers = enemy_zerglings.closest_n_units(nexus, 2)
-
-		# if self.supply_left < 3 and self.already_pending(PYLON) == 0:
-		#	  worker = self.workers.idle.random_or(None)
-		#	  if self.can_afford(PYLON) and worker:
-		#		  self.do(worker.build(UnitTypeId.PYLON,near=self.townhalls.ready.random_or(None)))
-
-		# self.build_protoss_ramp_wall()
-		# self.manage_worker_count()
 
 	async def build_coord_dict(self):
 		path_matrix = self.game_info.pathing_grid.data_numpy
