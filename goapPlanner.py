@@ -5,22 +5,23 @@ class GoapPlanner:
 
 	# Plan what sequence of actions can fulfill the goal.
 	# Returns null if a plan could not be found, or a list of the actions that must be performed, in order, to fulfill the goal.
-	def plan(self, agent, actions, state, goal):
+	def plan(self, agent, actions, gameObject):
 
 		usableActions = []
 		for action in actions:
 			# reset the actions so we can start fresh with them
 			action.doReset()
 			# check what actions can run using their checkProceduralPrecondition
-			if action.checkProceduralPrecondition(agent):
+			print("checking preconditions")
+			if action.checkProceduralPrecondition(gameObject, agent):
 				usableActions.append(action)
 
 		# we now have all actions that can run, stored in usableActions
 
 		#build up the tree and record the leaf nodes that provide a solution to the goal.
 		leaves = []
-		root = self.Node(None, 0, state, None)
-		if not self.buildGraph(root, leaves, usableActions, goal):
+		root = self.Node(None, 0, gameObject.worldState, None)
+		if not self.buildGraph(root, leaves, usableActions, gameObject.goal):
 			print("No available plan")
 			return
 
@@ -46,7 +47,7 @@ class GoapPlanner:
 		queue = []
 		for action in result:
 			queue.append(action)
-
+		print("returning action queue: ", queue)
 		return queue
 
 	class Node:

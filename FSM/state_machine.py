@@ -9,12 +9,11 @@ class StateMachine:
         self.handlers[name] = handler
         if endState:
             self.endStates.append(name)
-    
+
     def set_start(self, name):
         self.startState = name
 
     def run_step(self, gameObject):
-        print('made it to run state')
 
         if self.currentState is None:
             self.currentState = self.startState
@@ -27,12 +26,11 @@ class StateMachine:
             raise KeyError("must call .set_start() before .run_step()")
         if not self.endStates:
             raise Exception("at least one state must be an end_state")
-        
+
         # Perform State Action
         newState = handler(gameObject)
-        
+
         if newState in self.endStates:
             print('reached end state for unit')
         else:
             self.currentState = newState
-        

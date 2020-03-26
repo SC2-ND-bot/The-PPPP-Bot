@@ -1,16 +1,13 @@
 from actions.action import Action
 
 class AttackMoveAction(Action):
-	def __init__(self, agent, gameObject):
+	def __init__(self):
 		super().__init__()
-
-		self.agent = agent
-		self.gameObject = gameObject
-		self.cost = 1
+		self.cost = 2
 		self.attackLocation = None
 
 		# self.preconditions["attackingArea"] = False
-		self.effects["attackingArea"] = True
+		self.effects["attacking"] = True
 		self.effects["movingTowardsEnemy"] = True
 
 	def __repr__(self):
@@ -23,11 +20,11 @@ class AttackMoveAction(Action):
 	def reset(self):
 		self.attackLocation = None
 
-	def checkProceduralPrecondition(self, agent):
+	def checkProceduralPrecondition(self, gameObject, agent):
 		# This should generate a valid attackLocation
-		attackLocation = self.gameObject.enemy_start_locations[0]
+		attackLocation = gameObject.enemy_start_locations[0]
 		self.attackLocation = attackLocation
 		return True
 
-	def perform(self, firstAction):
-		self.gameObject.do(self.agent.unit.attack(self.attackLocation, not firstAction))
+	def perform(self, gameObject, unit, firstAction):
+		gameObject.do(unit.attack(self.attackLocation, not firstAction))

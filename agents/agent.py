@@ -6,11 +6,10 @@ from FSM.states import AgentStates
 
 class Agent:
 
-	def __init__(self):
-		self.unit = None
-		self.worldState = {}
+	def __init__(self, unitTag=None, planner=None):
+		self.unitTag = unitTag
 		self.stateMachine = StateMachine()
-		self.planner = None
+		self.planner = planner
 
 		self.availableActions = []
 		self.currentActions = []
@@ -24,20 +23,17 @@ class Agent:
 		# TODO: Create DataProvider which feeds the agents goals and state information
 		# self.dataProvider = DataProvider()
 
+	def getUnit(self, gameObject):
+		return gameObject.units.by_tag(self.unitTag)
+
 	def hasValidPlan(self):
 		raise NotImplementedError
 
 	def idleStateHandler(self, gameObject):
 		print('in idle state')
-		# goal = self.dataProvider.getGoal()
-		goal = ('movingTowardsEnemy', True)
 
-		# TODO: Should return all relevant world information
-		# worldState = self.dataProvider.getWorldState()
-		worldState = None
-
-		# agent, actions, state, goal
-		plan = self.planner.plan(self, self.availableActions, self.worldState, goal)
+		# agent, actions, gameObject
+		plan = self.planner.plan(self, self.availableActions, gameObject)
 
 		if plan is not None:
 			self.currentActions = plan
@@ -48,25 +44,26 @@ class Agent:
 
 	def performActionsStateHandler(self, gameObject):
 		print('in perform actions state')
-		if not self.hasValidPlan():
+		if not self.hasValidPlan(gameObject):
 			return "IDLE_STATE"
 
 		success = False
-		if self.hasValidPlan():
+		try:
 			for index, action in enumerate(self.currentActions):
-				firstAction = index == 0
-				action.perform(firstAction)
+				action.perform(gameObject, self.getUnit(gameObject), index == 0)
 			success = True
+		except:
+			print('Failed to queue up actions')
 
-			if not success:
-				print('Queuing Actions failed, going back to idle state')
-				return "IDLE_STATE"
+		if not success:
+			print('Queuing Actions failed, going back to idle state')
+			return "IDLE_STATE"
 
-			return "PERFORM_ACTIONS_STATE"
+		return "PERFORM_ACTIONS_STATE"
 
 	def loadActions(self):
 		raise NotImplementedError
 
 	# # Still unsure if we require this state and handler
-	def endStateHandler(self):
+	def endStateHandler(self, gameObject):
 		print('reached end state')

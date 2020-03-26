@@ -11,19 +11,21 @@ from FSM.state_machine import StateMachine
 from agents.adeptAgent import AdeptAgent
 from goapPlanner import GoapPlanner
 
+planner = GoapPlanner()
+
 class PPPP(sc2.BotAI):
 	def __init__(self):
 		self.path_coord_dict = {}
 		self.working_locations = {}
 		self.agents = {}
-		self.world_state = {}
+		self.worldState = {}
 		self.nexus_construct_time = 0
-		self.planner = GoapPlanner()
+		self.goal = ('attacking', True)
 
 	def create_agent(self, unit):
 		if unit.type_id == ADEPT:
 			print('made adept agent')
-			self.agents[unit] = AdeptAgent(unit, self, self.planner)
+			self.agents[unit.tag] = AdeptAgent(unit.tag, planner)
 
 	async def on_step(self, iteration):
 		if iteration == 0:
@@ -45,12 +47,12 @@ class PPPP(sc2.BotAI):
 
 		# Creates and Manages agents (Milestone 2 & 3)
 		for unit in self.units(ADEPT).ready:
-			if not self.agents.get(unit, False):
+			if not self.agents.get(unit.tag, False):
 				print('trying to create unit')
 				print(unit.type_id)
 				self.create_agent(unit)
 			else:
-				self.agents[unit].stateMachine.run_step(self)
+				self.agents[unit.tag].stateMachine.run_step(self)
 
 		######################################################################################################
 
@@ -97,7 +99,7 @@ class PPPP(sc2.BotAI):
 					if not self.gas_buildings or not self.gas_buildings.closer_than(1, geyser):
 						self.do(worker.build(UnitTypeId.ASSIMILATOR, geyser), subtract_cost=True)
 						self.do(worker.stop(queue=True))
-						self.distribute_workers()
+						await self.distribute_workers()
 		if self.time > self.nexus_construct_time + 180 and len(self.townhalls) < 4:
 			exp = await self.get_next_expansion()
 			await self.build(UnitTypeId.NEXUS, exp)
@@ -119,26 +121,26 @@ class PPPP(sc2.BotAI):
 		print("build_coord_dict() FINISHED!")
 
 	async def build_worldState_dict(self):
-		self.world_state['minerals'] = self.minerals # Resources
-		self.world_state['vespene'] = self.vespene
-		self.world_state['warp_gate_count'] = self.warp_gate_count
-		self.world_state['army_count'] = self.army_count
-		self.world_state['workers'] = self.workers
-		self.world_state['townhalls'] = self.townhalls # Your townhalls (nexus, hatchery, etc.)
-		self.world_state['gas_buildings'] = self.gas_buildings # Your gas structures (refinery, extractor, etc.)
-		self.world_state['units'] = self.units # Your units (includes larva and workers)
-		self.world_state['structures'] = self.structures # Your structures (includes townhalls and gas buildings)
-		self.world_state['start_location'] = self.start_location # Your spawn location (your first townhall location)
-		self.world_state['main_base_ramp'] = self.main_base_ramp # Location of your main base ramp
-		self.world_state['enemy_units'] = self.enemy_units # The following contains enemy units and structures inside your units' vision range
-		self.world_state['enemy_structures'] = self.enemy_structures
-		self.world_state['enemy_start_location'] = self.enemy_start_location # Enemy spawn locations as a list of Point2 points
-		self.world_state['blips'] = self.blips # Enemy units that are inside your sensor tower range
-		self.world_state['enemy_race'] = self.enemy_race
-		self.world_state['mineral_field'] = self.mineral_field # All mineral fields on the map
-		self.world_state['vespene_geyser'] = self.vespene_geyser # All vespene fields, even those that have a gas building on them
-		self.world_state['expansion_locations'] = self.expansion_locations # Locations of possible expansions
-		self.world_state['destructables'] = self.destructables # All destructable rocks (except the platforms below the main base ramp)
+		self.worldState['minerals'] = self.minerals # Resources
+		self.worldState['vespene'] = self.vespene
+		self.worldState['warp_gate_count'] = self.warp_gate_count
+		self.worldState['army_count'] = self.army_count
+		self.worldState['workers'] = self.workers
+		self.worldState['townhalls'] = self.townhalls # Your townhalls (nexus, hatchery, etc.)
+		self.worldState['gas_buildings'] = self.gas_buildings # Your gas structures (refinery, extractor, etc.)
+		self.worldState['units'] = self.units # Your units (includes larva and workers)
+		self.worldState['structures'] = self.structures # Your structures (includes townhalls and gas buildings)
+		self.worldState['start_location'] = self.start_location # Your spawn location (your first townhall location)
+		self.worldState['main_base_ramp'] = self.main_base_ramp # Location of your main base ramp
+		self.worldState['enemy_units'] = self.enemy_units # The following contains enemy units and structures inside your units' vision range
+		self.worldState['enemy_structures'] = self.enemy_structures
+		self.worldState['enemy_start_location'] = self.enemy_start_location # Enemy spawn locations as a list of Point2 points
+		self.worldState['blips'] = self.blips # Enemy units that are inside your sensor tower range
+		self.worldState['enemy_race'] = self.enemy_race
+		self.worldState['mineral_field'] = self.mineral_field # All mineral fields on the map
+		self.worldState['vespene_geyser'] = self.vespene_geyser # All vespene fields, even those that have a gas building on them
+		self.worldState['expansion_locations'] = self.expansion_locations # Locations of possible expansions
+		self.worldState['destructables'] = self.destructables # All destructable rocks (except the platforms below the main base ramp)
 
 
 	def go_to_work(self, worker):
@@ -155,9 +157,6 @@ class PPPP(sc2.BotAI):
 						break
 			else:
 				self.do(worker.gather(working_location))
-		else:
-			print("could not find location")
-
 
 	def find_working_location(self, root):
 		visited = [root]
@@ -182,7 +181,7 @@ def main():
 	sc2.run_game(
 		sc2.maps.get("AcropolisLE"),
 		[Bot(Race.Protoss, PPPP(), name="The PPPP"), Computer(Race.Zerg, Difficulty.VeryEasy)],
-		realtime=False,
+		realtime=True,
 	)
 
 if __name__ == "__main__":

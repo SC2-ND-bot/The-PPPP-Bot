@@ -3,7 +3,6 @@
 class Action:
     def  __init__(self):
         self.cost = 1
-        self.gameObject = None
         self.preconditions = {}
         self.effects = {}
 
@@ -15,13 +14,13 @@ class Action:
     def reset(self):
         raise NotImplementedError
 
-    def checkProceduralPrecondition(self, agent):
+    def checkProceduralPrecondition(self, gameObject, agent):
         raise NotImplementedError
 
     def isDone(self):
         raise NotImplementedError
 
-    def perform(self, firstAction):
+    def perform(self, gameObject, unit, firstAction):
         raise NotImplementedError
 
     # def addPrecondition(preconditionName, value):
