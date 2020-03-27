@@ -4,14 +4,14 @@ class AttackEnemyAction(Action):
 	def __init__(self):
 		super().__init__()
 		self.cost = 1
-		self.attackLocation = None
+		self.enemy = None
 
-		# self.preconditions["attackingArea"] = False
+		self.preconditions["canAttack"] = True
 		self.effects["attacking"] = True
-		self.effects["movingTowardsEnemy"] = True
+		self.effects["canAttack"] = False
 
 	def __repr__(self):
-		return "Attack Enemey Action Class"
+		return "Attack Enemy Action Class"
 
 	# def calcCost(self):
 	# 	# determine the cost for this action
@@ -19,14 +19,16 @@ class AttackEnemyAction(Action):
 
 	def reset(self):
 		self.enemy = None
-		self.attackLocation = None
-
 
 	def checkProceduralPrecondition(self, gameObject, agent):
-		# This should generate a valid attackLocation
-		enemies = gameObject.enemy_units()
 		unit = agent.getUnit(gameObject)
-		enemies_unit_can_attack = enemies.in_attack_range_of(unit, 3)
+
+		# unit has to be able to attack
+		if unit.weapon_cooldown != 0
+			return False
+
+		enemies = gameObject.enemy_units()
+		enemies_unit_can_attack = enemies.in_attack_range_of(unit, 0)
 
 		enemy_to_attack = None
 		for enemy in enemies_unit_can_attack:

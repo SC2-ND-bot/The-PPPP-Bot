@@ -12,10 +12,6 @@ class AdeptAgent(Agent):
 	def hasValidPlan(self, gameObject):
 		# Add additional checks that should abort plan, like is_under_attack
 		unit = self.getUnit(gameObject)
-		print("checking for valid plan")
-		print("is idle: ", unit.is_idle)
-		print("is attacking: ", unit.is_attacking)
-		print("not (is_idle or is_attacking): ", not (unit.is_idle or unit.is_attacking))
 		return not unit.is_attacking
 
 	# Requires further changes, not working right now

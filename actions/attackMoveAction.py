@@ -8,7 +8,6 @@ class AttackMoveAction(Action):
 
 		# self.preconditions["attackingArea"] = False
 		self.effects["attacking"] = True
-		self.effects["movingTowardsEnemy"] = True
 
 	def __repr__(self):
 		return "Attack Move Action Class"
@@ -21,7 +20,6 @@ class AttackMoveAction(Action):
 		self.attackLocation = None
 
 	def checkProceduralPrecondition(self, gameObject, agent):
-		# This should generate a valid attackLocation
 		attackLocation = gameObject.enemy_start_locations[0]
 		self.attackLocation = attackLocation
 		return True
