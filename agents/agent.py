@@ -12,7 +12,9 @@ class Agent:
 		self.planner = planner
 
 		self.availableActions = []
-		self.currentActions = []
+		self.plannedActions = []
+		self.currentAction = None
+		self.state = {}
 
 		self.stateMachine.add_state("IDLE_STATE", self.idleStateHandler)
 		self.stateMachine.add_state("PERFORM_ACTIONS_STATE", self.performActionsStateHandler)
@@ -26,38 +28,57 @@ class Agent:
 	def getUnit(self, gameObject):
 		return gameObject.units.by_tag(self.unitTag)
 
-	def hasValidPlan(self):
+	def isPlanInvalid(self):
 		raise NotImplementedError
 
 	def idleStateHandler(self, gameObject):
+		print("\n\n",self.unitTag)
 		print('in idle state')
+		print('state at the start of idle: ', self.state)
 
 		# agent, actions, gameObject
 		plan = self.planner.plan(self, self.availableActions, gameObject)
-
+		print("plan: ", plan)
 		if plan is not None:
-			self.currentActions = plan
+			print("plan is not None")
+
+			self.plannedActions = plan
 			return "PERFORM_ACTIONS_STATE"
 		else:
 			print('No valid plan found, agent will remain idle')
 			return "IDLE_STATE"
 
 	def performActionsStateHandler(self, gameObject):
+		print("\n\n",self.unitTag)
 		print('in perform actions state')
-		if not self.hasValidPlan(gameObject):
+		if self.isPlanInvalid(gameObject):
 			return "IDLE_STATE"
 
-		success = False
-		try:
-			for index, action in enumerate(self.currentActions):
-				action.perform(gameObject, self.getUnit(gameObject), index == 0)
-			success = True
-		except:
-			print('Failed to queue up actions')
+		if self.currentAction is None:
+			self.currentAction = self.plannedActions.pop()
 
-		if not success:
-			print('Queuing Actions failed, going back to idle state')
-			return "IDLE_STATE"
+		print("state before queuing actions: ", self.state)
+		print("planned Actions: ", self.plannedActions)
+		self.currentAction.reset()
+		print("checking: ", self.currentAction)
+		if not self.currentAction.checkProceduralPrecondition(gameObject, self):
+			self.state = { **self.state, **self.currentAction.effects }
+			if len(self.plannedActions) == 0:
+				print('preconditions failed, plan is empty. Going back to idle state')
+				return "IDLE_STATE"
+			else:
+				self.currentAction = self.plannedActions.pop()
+				print('preconditions failed, new current action: ', self.currentAction)
+		print("performing: ", self.currentAction)
+		self.currentAction.perform(gameObject, self.getUnit(gameObject), True)
+		# for index, action in enumerate(self.plannedActions):
+			# 	print('performing action: ', action)
+			# 	print('first action?: ', index==0)
+			# 	action.perform(gameObject, self.getUnit(gameObject), index == 0)
+		# 	# Update agent state to reflect actions
+		# 	# print("state after queuing actions: ", self.state)
+		# except Exception:
+		# 	print('Failed to perfrom action: ', Exception)
 
 		return "PERFORM_ACTIONS_STATE"
 

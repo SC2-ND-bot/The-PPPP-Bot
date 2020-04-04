@@ -6,9 +6,8 @@ class AttackEnemyAction(Action):
 		self.cost = 1
 		self.enemy = None
 
-		self.preconditions["canAttack"] = True
 		self.effects["attacking"] = True
-		self.effects["canAttack"] = False
+		self.effects["retreating"] = False
 
 	def __repr__(self):
 		return "Attack Enemy Action Class"
@@ -19,12 +18,12 @@ class AttackEnemyAction(Action):
 
 	def reset(self):
 		self.enemy = None
+		self.cost = 1
 
 	def checkProceduralPrecondition(self, gameObject, agent):
 		unit = agent.getUnit(gameObject)
 
-		# unit has to be able to attack
-		if unit.weapon_cooldown != 0
+		if unit.weapon_cooldown > 0:
 			return False
 
 		enemies = gameObject.enemy_units()
@@ -40,7 +39,9 @@ class AttackEnemyAction(Action):
 
 		self.enemy = enemy_to_attack
 
-		return enemy_to_attack is not None
+		print("enemy to attack: ", enemy_to_attack)
+
+		return self.enemy is not None
 
 	def perform(self, gameObject, unit, firstAction):
 		gameObject.do(unit.attack(self.enemy, not firstAction))

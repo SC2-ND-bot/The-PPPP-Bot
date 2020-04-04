@@ -1,18 +1,29 @@
 from agents.agent import Agent
-from actions.attackMoveAction import AttackMoveAction
+from actions.findEnemyAction import FindEnemyAction
 from actions.attackEnemyAction import AttackEnemyAction
+from actions.retreatAction import RetreatAction
 
 class AdeptAgent(Agent):
 	def __init__(self, unitTag=None, planner=None):
 		super().__init__(unitTag, planner)
 		self.last_shield_health_percentage = 1.0
-		self.availableActions.append(AttackMoveAction())
-		self.availableActions.append(AttackEnemyAction())
+		self.state = {
+			"canAttack": True,
+			"attacking": False,
+			"underAttack": False,
+			"health_critical": False,
+			"retreating": False
+		}
 
-	def hasValidPlan(self, gameObject):
+		self.availableActions.append(FindEnemyAction())
+		self.availableActions.append(AttackEnemyAction())
+		self.availableActions.append(RetreatAction())
+
+	def isPlanInvalid(self, gameObject):
 		# Add additional checks that should abort plan, like is_under_attack
 		unit = self.getUnit(gameObject)
-		return not unit.is_attacking
+		print('health critical and not retreating: ', self.state["health_critical"] and not self.state["retreating"])
+		return self.state["health_critical"] and not self.state["retreating"]
 
 	# Requires further changes, not working right now
 	def is_under_attack(self, gameObject):
