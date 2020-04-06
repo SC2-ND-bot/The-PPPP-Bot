@@ -23,9 +23,10 @@ class RetreatAction(Action):
 
 	def checkProceduralPrecondition(self, gameObject, agent):
 		unit = agent.getUnit(gameObject)
-		weapon_cooldown = unit.weapon_cooldown
+		weapon_cooldown = min(unit.weapon_cooldown, 1.61)
 		speed = unit.movement_speed
 		distance_to_travel = (speed * weapon_cooldown)/2
+
 		enemies = gameObject.enemy_units()
 
 		if weapon_cooldown == 0 and not agent.state['health_critical']:
@@ -38,8 +39,6 @@ class RetreatAction(Action):
 
 		x, y = self.calc_new_location(unit, closest_enemy, distance_to_travel)
 
-		print("calc new location: ", x, y)
-
 		bound_x = gameObject._game_info.playable_area.x
 		bound_y = gameObject._game_info.playable_area.y
 
@@ -50,7 +49,6 @@ class RetreatAction(Action):
 		y = max(y, 0)
 
 		self.retreatLocation = Point2((x, y))
-
 		return self.retreatLocation is not None
 
 	def calc_new_location(self, unit, enemy, d):
@@ -67,5 +65,6 @@ class RetreatAction(Action):
 
 		return (x, y)
 
-	def perform(self, gameObject, unit, firstAction):
+	def perform(self, gameObject, agent, firstAction):
+		unit = agent.getUnit(gameObject)
 		gameObject.do(unit.move(self.retreatLocation, not firstAction))

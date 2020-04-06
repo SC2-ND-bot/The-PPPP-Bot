@@ -8,8 +8,14 @@ from sc2 import Race, Difficulty
 from sc2.constants import *
 from sc2.player import Bot, Computer
 from sc2.position import Point2, Point3
-from FSM.state_machine import StateMachine
+
+from buildOrder import buildOrder
+from buildOrder import buildtreeNode
+
 from agents.adeptAgent import AdeptAgent
+from agents.sentryAgent import SentryAgent
+
+from FSM.state_machine import StateMachine
 from goapPlanner import GoapPlanner
 
 planner = GoapPlanner()
@@ -23,7 +29,7 @@ class PPPP(sc2.BotAI):
 		self.nexus_construct_time = 0
 		self.goal = ('attacking', True)
 
-	def create_agent(self, unit):
+	async def create_agent(self, unit):
 		if unit.type_id == ADEPT:
 			print('made adept agent')
 			self.agents[unit.tag] = AdeptAgent(unit.tag, planner)
@@ -79,7 +85,7 @@ class PPPP(sc2.BotAI):
 				elif inst[1] == -1: # Research
 					if self.research(inst[0]):
 						self.buildTree.curr.executed = True
-		
+
 		# Logic for execution of late-game build FSM (Milestone 4)
 		if self.time > 450:
 			toBuild = self.lateGameBuild.getInstructions(self.structures, self.enemy_units, self.enemy_structures)
@@ -194,7 +200,7 @@ def main():
 	sc2.run_game(
 		sc2.maps.get("AcropolisLE"),
 		[Bot(Race.Protoss, PPPP(), name="The PPPP"), Computer(Race.Zerg, Difficulty.VeryEasy)],
-		realtime=True,
+		realtime=False,
 	)
 
 if __name__ == "__main__":
