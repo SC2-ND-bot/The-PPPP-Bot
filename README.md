@@ -33,9 +33,12 @@ The fourth is a Goal Orientied Action Planner, which is in charge of controlling
 
 1. Agents:
 Each agent is in of defining their FSM and triggering each 'tick', as well as determining what actions it has available to perform. The following agents have been implemented:
+   - Zealot: Basic unit used to harass and scout opponent units.
    - Adept: Early game unit used to apply early pressure to the opponent. Good against light enemies.
    - Sentry: Unit which has many abilities, and is used to create hallucinations for scouting purposes.
-   - Phoenix: Flying unit which does bonus damage against light units. Also, hallucinations of this unit are usually used to scout. 
+   - Phoenix: Flying unit which does bonus damage against light units. Also, hallucinations of this unit are usually used to scout.
+   - Stalker: Fast-moving ranged unit great for hit-and-run tactics. Is able to attack both ground and air units.
+   - Immortal: Powerful ranged unit that is great for dealing large amounts of damage while also having great defensive capabilities.
 2. Planner:
 Determines what sequence of actions it has to perform in order to meet the goal and determines what goal each agent should complete (this is yet to be implemented)
 3. Actions:
