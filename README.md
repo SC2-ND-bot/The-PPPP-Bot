@@ -21,13 +21,15 @@ This bot will implement a strategy which involves storing a wide vareity of poss
 
 ## Control Mechanisms and Functionality
 
-Our bot utilizes two control mechanisms to strategically pursue victory:
+Our bot utilizes four control mechanisms to strategically pursue victory:
 
 The first is a behavior tree which implements the build orders discussed above.  The tree is implemented using two additional classes, buildtreeNode and buildOrder.  The node class contains functionality which allows for the evaluation and execution of training units, building buildings, or conducting research.  Each node represents a singular action and the conditions that must be met for it to be undertaken.  The buildOrder class constructs all of the nodes at the beginning of the game and handles stepping through the tree.  After a node is executed, this class evaluates which branch to take to move further down an optimal build order.  Decisions on which buildOrder to pursue down the tree can be made on a variety of factors including enemy race, enemy units on the map, game duration, resources available, and others.
 
-The second is a finite state machine which manages the bot's econonmy.  It dynamically evaluates the game state to determien when to build probes, assimilators, expansions, and pylons.  It also works to properly distribute workers in order to maintain the optimal ratio of mineral to gas resource gathering.
+The second is a finite state machine which controls all army and structure production after the initial build order is complete.  It does this by determining what units and buildings the enemy has and then constructing its own units and buildings to counter them.  It utilizes established best-known counters gathered from the online Starcraft II community.  This leads to a late-game army composition which is optimally build to defeat the specific enemy that the bot is playing against.
 
-The third is a Goal Orientied Action Planner, which is in charge of controlling units at a micro scale. It does so by utilizing four main pieces. 
+The third is a finite state machine which manages the bot's econonmy.  It dynamically evaluates the game state to determien when to build probes, assimilators, expansions, and pylons.  It also works to properly distribute workers in order to maintain the optimal ratio of mineral to gas resource gathering.
+
+The fourth is a Goal Orientied Action Planner, which is in charge of controlling units at a micro scale. It does so by utilizing four main pieces. 
 
 1. Agents:
 Each agent is in of defining their FSM and triggering each 'tick', as well as determining what actions it has available to perform.
