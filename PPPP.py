@@ -3,6 +3,7 @@ import math
 import sc2
 from buildOrder import buildtreeNode
 from buildOrder import buildOrder
+from lateGameFSM import lateGameFSM
 from sc2 import Race, Difficulty
 from sc2.constants import *
 from sc2.player import Bot, Computer
@@ -30,6 +31,7 @@ class PPPP(sc2.BotAI):
 			await self.chat_send("(probe)(pylon)(cannon)(cannon)(gg)")
 			await self.build_coord_dict()
 			self.buildTree = buildOrder(self.game_data, self.enemy_race)
+			self.lateGameBuild = lateGameFSM(self.enemy_race)
 		bases = self.townhalls.ready
 		gas_buildings = self.gas_buildings.ready
 		for resource in bases | gas_buildings:
@@ -57,23 +59,34 @@ class PPPP(sc2.BotAI):
 		# Logic for execution of build tree (Milestone 2)
 		map_center = self.game_info.map_center
 		position_towards_map_center = self.start_location.towards(map_center, distance=random.randint(0, 15))
-		inst = self.buildTree.stepDown(self.minerals, self.vespene, self.supply_left, self.state)
-		if inst != None:
-			if inst[1] == 0: # A unit
-				if inst[0] == UnitTypeId.PROBE:
-					nexus = random.choice(self.townhalls)
-					if self.do(nexus.train(PROBE), subtract_cost=True, subtract_supply=True):
+		if self.time < 450:
+			inst = self.buildTree.stepDown(self.minerals, self.vespene, self.supply_left, self.state)
+			if inst != None:
+				if inst[1] == 0: # A unit
+					if inst[0] == UnitTypeId.PROBE:
+						nexus = random.choice(self.townhalls)
+						if self.do(nexus.train(PROBE), subtract_cost=True, subtract_supply=True):
+							self.buildTree.curr.executed = True
+					else:
+						if self.train(inst[0]):
+							self.buildTree.curr.executed = True
+				elif inst[1] == 1: # A building
+					if self.tech_requirement_progress(inst[0]) >= 1:
+						if await self.build(inst[0], near=position_towards_map_center, placement_step=1):
+							self.buildTree.curr.executed = True
+				elif inst[1] == -1: # Research
+					if self.research(inst[0]):
 						self.buildTree.curr.executed = True
-				else:
-					if self.train(inst[0]):
-						self.buildTree.curr.executed = True
-			elif inst[1] == 1: # A building
-				if self.tech_requirement_progress(inst[0]) >= 1:
-					if await self.build(inst[0], near=position_towards_map_center, placement_step=1):
-						self.buildTree.curr.executed = True
-			elif inst[1] == -1: # Research
-				if self.research(inst[0]):
-					self.buildTree.curr.executed = True
+		
+		# Logic for execution of late-game build FSM (Milestone 4)
+		if self.time > 450:
+			toBuild = self.lateGameBuild.getInstructions(self.structures, self.enemy_units, self.enemy_structures)
+			for inst in toBuild:
+				if inst[0] != UnitTypeId(0) and self.already_pending(inst[0]) == 0:
+					if inst[1] == "building":
+						await self.build(inst[0], near=position_towards_map_center, placement_step=1)
+					elif inst[1] == "unit":
+						self.train(inst[0])
 
 		# Logic for execution of economy FSM (Milestone 3)
 		if self.supply_left <= 3 and self.already_pending(UnitTypeId.PYLON) == 0:
