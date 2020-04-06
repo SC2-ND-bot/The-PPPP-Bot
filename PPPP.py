@@ -1,17 +1,28 @@
 import random
 import math
 import sc2
-from buildOrder import buildtreeNode
-from buildOrder import buildOrder
 from sc2 import Race, Difficulty
 from sc2.constants import *
 from sc2.player import Bot, Computer
 from sc2.position import Point2, Point3
-from FSM.state_machine import StateMachine
+
+from buildOrder import buildOrder
+from buildOrder import buildtreeNode
+
 from agents.adeptAgent import AdeptAgent
+from agents.sentryAgent import SentryAgent
+
+from FSM.state_machine import StateMachine
 from goapPlanner import GoapPlanner
 
 planner = GoapPlanner()
+
+# nexuses = self.structures(NEXUS)
+# abilities = await self.get_available_abilities(nexuses)
+# for loop_nexus, abilities_nexus in zip(nexuses, abilities):
+# 	if AbilityId.EFFECT_CHRONOBOOSTENERGYCOST in abilities_nexus:
+# 		self.do(loop_nexus(AbilityId.EFFECT_CHRONOBOOSTENERGYCOST, nexus))
+# 		break
 
 class PPPP(sc2.BotAI):
 	def __init__(self):
@@ -22,10 +33,15 @@ class PPPP(sc2.BotAI):
 		self.nexus_construct_time = 0
 		self.goal = ('attacking', True)
 
-	def create_agent(self, unit):
-		if unit.type_id == ADEPT:
-			print('made adept agent')
-			self.agents[unit.tag] = AdeptAgent(unit.tag, planner)
+	async def create_agent(self, unit):
+		# if unit.type_id == ADEPT:
+		# 	print('made adept agent')
+		# 	self.agents[unit.tag] = AdeptAgent(unit.tag, planner)
+		if unit.type_id == SENTRY:
+			abilities = await self.get_available_abilities(unit)
+			print(abilities)
+			# print('made sentry agent')
+			# self.agents[unit.tag] = Sentry(unit.tag, planner)
 
 	async def on_step(self, iteration):
 		if iteration == 0:
@@ -46,13 +62,17 @@ class PPPP(sc2.BotAI):
 		#####################################################################################################
 
 		# Creates and Manages agents (Milestone 2 & 3)
-		for unit in self.units(ADEPT).ready:
-			if not self.agents.get(unit.tag, False):
-				print('trying to create unit')
-				print(unit.type_id)
-				self.create_agent(unit)
-			else:
-				self.agents[unit.tag].stateMachine.run_step(self)
+		for unit in self.units(SENTRY).ready:
+			abilities = await self.get_available_abilities(unit)
+			print(unit.energy)
+			print(abilities)
+
+			# if not self.agents.get(unit.tag, False):
+			# 	print('trying to create unit')
+			# 	print(unit.type_id)
+			# 	self.create_agent(unit)
+			# else:
+			# 	self.agents[unit.tag].stateMachine.run_step(self)
 
 		######################################################################################################
 
@@ -181,7 +201,7 @@ def main():
 	sc2.run_game(
 		sc2.maps.get("AcropolisLE"),
 		[Bot(Race.Protoss, PPPP(), name="The PPPP"), Computer(Race.Zerg, Difficulty.VeryEasy)],
-		realtime=True,
+		realtime=False,
 	)
 
 if __name__ == "__main__":

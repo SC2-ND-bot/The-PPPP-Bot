@@ -20,7 +20,7 @@ class Action:
     def isDone(self):
         raise NotImplementedError
 
-    def perform(self, gameObject, unit, firstAction):
+    def perform(self, gameObject, agent, firstAction):
         raise NotImplementedError
 
     # def addPrecondition(preconditionName, value):
