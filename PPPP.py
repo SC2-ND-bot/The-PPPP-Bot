@@ -53,7 +53,7 @@ class PPPP(sc2.BotAI):
 				self.go_to_work(worker)
 		#####################################################################################################
 
-		# Creates and Manages agents (Milestone 2 & 3)
+		# Creates and Manages agents
 		for unit in self.units(ADEPT).ready:
 			if not self.agents.get(unit.tag, False):
 				print('trying to create unit')
