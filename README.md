@@ -40,7 +40,7 @@ Determines what sequence of actions it has to perform in order to meet the goal 
 4. Finite State Machine:
 The FSM will place each agent into either an idle or a performAction state where it can calculate upcoming goals/plans or execture specific actions respectively.
 
-A lot of the unit specific work related to the GOAP is yet to be implemented, however the groundwork has been established so that now unit specific code can be written modularly.
+A lot of the unit specific work related to the GOAP is yet to be implemented, however the groundwork has been established so that now unit specific code can be written modularly. Currently the Protoss units that have been integrated as agents are Zealots, Adepts, Sentries, Stalkers, Phoenixes, and Immortals.
 
 ## Dependancies
 
