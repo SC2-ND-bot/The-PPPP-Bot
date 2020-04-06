@@ -32,5 +32,5 @@ class FindEnemyAction(Action):
 		return self.attackLocation is not None
 
 	def perform(self, gameObject, agent, firstAction):
-      	unit = agent.getUnit(gameObject)
+		unit = agent.getUnit(gameObject)
 		gameObject.do(unit.attack(self.attackLocation, not firstAction))

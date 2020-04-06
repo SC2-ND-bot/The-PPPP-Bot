@@ -29,7 +29,7 @@ class PPPP(sc2.BotAI):
 		self.nexus_construct_time = 0
 		self.goal = ('attacking', True)
 
-	async def create_agent(self, unit):
+	def create_agent(self, unit):
 		if unit.type_id == ADEPT:
 			print('made adept agent')
 			self.agents[unit.tag] = AdeptAgent(unit.tag, planner)
@@ -56,8 +56,6 @@ class PPPP(sc2.BotAI):
 		# Creates and Manages agents
 		for unit in self.units(ADEPT).ready:
 			if not self.agents.get(unit.tag, False):
-				print('trying to create unit')
-				print(unit.type_id)
 				self.create_agent(unit)
 			else:
 				self.agents[unit.tag].stateMachine.run_step(self)

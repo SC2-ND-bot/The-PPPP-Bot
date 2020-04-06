@@ -42,5 +42,5 @@ class AttackEnemyAction(Action):
 		return self.enemy is not None
 
 	def perform(self, gameObject, agent, firstAction):
-      	unit = agent.getUnit(gameObject)
+		unit = agent.getUnit(gameObject)
 		gameObject.do(unit.attack(self.enemy, not firstAction))
