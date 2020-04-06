@@ -2,8 +2,9 @@ from agents.agent import Agent
 from actions.findEnemyAction import FindEnemyAction
 from actions.attackEnemyAction import AttackEnemyAction
 from actions.retreatAction import RetreatAction
+from actions.scoutHallucinationAction import ScoutHallucinationAction
 
-class AdeptAgent(Agent):
+class SentryAgent(Agent):
 	def __init__(self, unitTag=None, planner=None):
 		super().__init__(unitTag, planner)
 		self.last_shield_health_percentage = 1.0
@@ -11,6 +12,7 @@ class AdeptAgent(Agent):
 			"canAttack": True,
 			"attacking": False,
 			"underAttack": False,
+			"lastScoutTimestamp": None,
 			"health_critical": False,
 			"retreating": False
 		}
@@ -22,6 +24,7 @@ class AdeptAgent(Agent):
 		self.availableActions.append(FindEnemyAction())
 		self.availableActions.append(AttackEnemyAction())
 		self.availableActions.append(RetreatAction())
+		self.availableActions.append(ScoutHallucinationAction())
 
 	def isPlanInvalid(self, gameObject):
 		# Add additional checks that should abort plan, like is_under_attack

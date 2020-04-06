@@ -8,8 +8,14 @@ from sc2 import Race, Difficulty
 from sc2.constants import *
 from sc2.player import Bot, Computer
 from sc2.position import Point2, Point3
-from FSM.state_machine import StateMachine
+
+from buildOrder import buildOrder
+from buildOrder import buildtreeNode
+
 from agents.adeptAgent import AdeptAgent
+from agents.sentryAgent import SentryAgent
+
+from FSM.state_machine import StateMachine
 from goapPlanner import GoapPlanner
 
 planner = GoapPlanner()
@@ -47,11 +53,9 @@ class PPPP(sc2.BotAI):
 				self.go_to_work(worker)
 		#####################################################################################################
 
-		# Creates and Manages agents (Milestone 2 & 3)
+		# Creates and Manages agents
 		for unit in self.units(ADEPT).ready:
 			if not self.agents.get(unit.tag, False):
-				print('trying to create unit')
-				print(unit.type_id)
 				self.create_agent(unit)
 			else:
 				self.agents[unit.tag].stateMachine.run_step(self)
@@ -79,7 +83,7 @@ class PPPP(sc2.BotAI):
 				elif inst[1] == -1: # Research
 					if self.research(inst[0]):
 						self.buildTree.curr.executed = True
-		
+
 		# Logic for execution of late-game build FSM (Milestone 4)
 		if self.time > 450:
 			toBuild = self.lateGameBuild.getInstructions(self.structures, self.enemy_units, self.enemy_structures)
@@ -194,7 +198,7 @@ def main():
 	sc2.run_game(
 		sc2.maps.get("AcropolisLE"),
 		[Bot(Race.Protoss, PPPP(), name="The PPPP"), Computer(Race.Zerg, Difficulty.VeryEasy)],
-		realtime=True,
+		realtime=False,
 	)
 
 if __name__ == "__main__":

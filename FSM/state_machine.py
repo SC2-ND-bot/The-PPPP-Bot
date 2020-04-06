@@ -18,8 +18,6 @@ class StateMachine:
         if self.currentState is None:
             self.currentState = self.startState
 
-        print('current state: ', self.currentState)
-
         try:
             handler = self.handlers[self.currentState]
         except:
