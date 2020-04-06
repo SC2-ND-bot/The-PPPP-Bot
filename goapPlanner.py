@@ -46,7 +46,7 @@ class GoapPlanner:
 		queue = []
 		for action in result:
 			queue.append(action)
-		print("returning action queue: ", queue)
+		#print("returning action queue: ", queue)
 		return queue
 
 	class Node:

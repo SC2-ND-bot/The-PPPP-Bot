@@ -8,7 +8,7 @@ class Scout(Action):
 	def __init__(self):
 		super().__init__()
 		self.cost = 2.0
-        self.scoutLocations = None
+		self.scoutLocations = None
 
 		self.preconditions["hallucinationCreated"] = True
 		self.effects["scouted"] = True
@@ -17,12 +17,12 @@ class Scout(Action):
 		return "Hallucination Action Class"
 
 	def reset(self):
-        self.scoutLocations = None
+		self.scoutLocations = None
 
 	def checkProceduralPrecondition(self, gameObject, agent):
 		unit = agent.getUnit(gameObject)
 
-		if not unit.is_hallucination():
+		if not unit.is_hallucination:
 			return False
 
 		self.scoutLocations = [gameObject.enemy_start_locations[0]]
@@ -30,6 +30,6 @@ class Scout(Action):
 		return self.scoutLocations is not None
 
 	def perform(self, gameObject, agent, firstAction):
-        unit = agent.getUnit(gameObject)
+		unit = agent.getUnit(gameObject)
 		for index, location in enumerate(self.scoutLocations):
 			gameObject.do(unit.move(location, index != 0))

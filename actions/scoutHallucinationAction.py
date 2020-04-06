@@ -1,5 +1,6 @@
 from actions.action import Action
 from sc2.position import Point2, Point3
+from sc2.ids.ability_id import AbilityId
 
 import time
 import math
@@ -26,11 +27,15 @@ class ScoutHallucinationAction(Action):
 
 		lastScout = agent.state["lastScoutTimestamp"]
 		currentTimestamp = time.time()
-		if currentTimestamp - lastScout > 45:
+		if lastScout is not None:
+			if currentTimestamp - lastScout > 45:
+				self.effects['lastScoutTimestamp'] = currentTimestamp
+				self.hallucinationId = AbilityId.HALLUCINATION_PHOENIX
+			else:
+				agent.state['scouted'] = False
+		else:
 			self.effects['lastScoutTimestamp'] = currentTimestamp
 			self.hallucinationId = AbilityId.HALLUCINATION_PHOENIX
-		else:
-			agent.state['scouted'] = False
 
 		return self.hallucinationId is not None
 

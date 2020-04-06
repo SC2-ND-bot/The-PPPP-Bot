@@ -32,31 +32,31 @@ class Agent:
 		raise NotImplementedError
 
 	def idleStateHandler(self, gameObject):
-		print("\n\n",self.unitTag)
-		print('in idle state')
+		#print("\n\n",self.unitTag)
+		#print('in idle state')
 
 		# agent, actions, gameObject
 		plan = self.planner.plan(self, self.availableActions, gameObject)
-		print("plan: ", plan)
+		#print("plan: ", plan)
 		if plan is not None:
-			print("plan is not None")
+			#print("plan is not None")
 
 			self.plannedActions = plan
 			return "PERFORM_ACTIONS_STATE"
 		else:
-			print('No valid plan found, agent will remain idle')
+			#print('No valid plan found, agent will remain idle')
 			return "IDLE_STATE"
 
 	def performActionsStateHandler(self, gameObject):
-		print("\n\n",self.unitTag)
-		print('in perform actions state')
+		#print("\n\n",self.unitTag)
+		#print('in perform actions state')
 		if self.isPlanInvalid(gameObject):
 			return "IDLE_STATE"
 
 		if self.currentAction is None:
 			self.currentAction = self.plannedActions.pop()
 
-		print("planned Actions: ", self.plannedActions)
+		#print("planned Actions: ", self.plannedActions)
 		self.currentAction.reset()
 		if not self.currentAction.checkProceduralPrecondition(gameObject, self):
 			self.state = { **self.state, **self.currentAction.effects }
@@ -64,7 +64,7 @@ class Agent:
 				return "IDLE_STATE"
 			else:
 				self.currentAction = self.plannedActions.pop()
-		print("performing: ", self.currentAction)
+		#print("performing: ", self.currentAction)
 		self.currentAction.perform(gameObject, self, True)
 
 		return "PERFORM_ACTIONS_STATE"

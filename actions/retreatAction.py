@@ -29,7 +29,7 @@ class RetreatAction(Action):
 
 		enemies = gameObject.enemy_units()
 
-		if weapon_cooldown == 0 and not agent.state['health_critical']:
+		if weapon_cooldown <= 0 and not agent.state['health_critical']:
 			return False
 
 		if enemies.amount <= 0:

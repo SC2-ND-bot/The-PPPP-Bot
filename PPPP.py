@@ -13,7 +13,11 @@ from buildOrder import buildOrder
 from buildOrder import buildtreeNode
 
 from agents.adeptAgent import AdeptAgent
+from agents.zealotAgent import ZealotAgent
 from agents.sentryAgent import SentryAgent
+from agents.phoenixAgent import PhoenixAgent
+from agents.immortalAgent import ImmortalAgent
+from agents.stalkerAgent import StalkerAgent
 
 from FSM.state_machine import StateMachine
 from goapPlanner import GoapPlanner
@@ -33,6 +37,21 @@ class PPPP(sc2.BotAI):
 		if unit.type_id == ADEPT:
 			print('made adept agent')
 			self.agents[unit.tag] = AdeptAgent(unit.tag, planner)
+		elif unit.type_id == ZEALOT:
+			print('made zealot agent')
+			self.agents[unit.tag] = ZealotAgent(unit.tag, planner)
+		elif unit.type_id == SENTRY:
+			print('made sentry agent')
+			self.agents[unit.tag] = SentryAgent(unit.tag, planner)
+		elif unit.type_id == IMMORTAL:
+			print('made immortal agent')
+			self.agents[unit.tag] = ImmortalAgent(unit.tag, planner)
+		elif unit.type_id == PHOENIX:
+			print('made phoenix agent')
+			self.agents[unit.tag] = PhoenixAgent(unit.tag, planner)
+		elif unit.type_id == STALKER:
+			print('made stalker agent')
+			self.agents[unit.tag] = StalkerAgent(unit.tag, planner)
 
 	async def on_step(self, iteration):
 		if iteration == 0:
@@ -55,6 +74,31 @@ class PPPP(sc2.BotAI):
 
 		# Creates and Manages agents
 		for unit in self.units(ADEPT).ready:
+			if not self.agents.get(unit.tag, False):
+				self.create_agent(unit)
+			else:
+				self.agents[unit.tag].stateMachine.run_step(self)
+		for unit in self.units(ZEALOT).ready:
+			if not self.agents.get(unit.tag, False):
+				self.create_agent(unit)
+			else:
+				self.agents[unit.tag].stateMachine.run_step(self)
+		for unit in self.units(SENTRY).ready:
+			if not self.agents.get(unit.tag, False):
+				self.create_agent(unit)
+			else:
+				self.agents[unit.tag].stateMachine.run_step(self)
+		for unit in self.units(IMMORTAL).ready:
+			if not self.agents.get(unit.tag, False):
+				self.create_agent(unit)
+			else:
+				self.agents[unit.tag].stateMachine.run_step(self)
+		for unit in self.units(PHOENIX).ready:
+			if not self.agents.get(unit.tag, False):
+				self.create_agent(unit)
+			else:
+				self.agents[unit.tag].stateMachine.run_step(self)
+		for unit in self.units(STALKER).ready:
 			if not self.agents.get(unit.tag, False):
 				self.create_agent(unit)
 			else:
@@ -103,7 +147,8 @@ class PPPP(sc2.BotAI):
 		for ass in self.gas_buildings:
 			if (ass.assigned_harvesters < 1 or (ass.assigned_harvesters < 3 and self.time > 180)) and self.already_pending(UnitTypeId.ASSIMILATOR) == 0 and self.already_pending(UnitTypeId.NEXUS) == 0:
 				worker = self.select_build_worker(position_towards_map_center)
-				self.do(worker.gather(ass))
+				if worker is not None:
+					self.do(worker.gather(ass))
 		for nexus in self.townhalls:
 			geysers = self.vespene_geyser.closer_than(15, nexus)
 			for geyser in geysers:
