@@ -20,7 +20,7 @@ class buildtreeNode(sc2.BotAI):
         self.vespene = 0
         self.supply_left = 0
         self.state = 0
-    
+
     def executeContents(self):
         return [self.nodeContents, self.nodeType]
 
@@ -46,13 +46,13 @@ class buildOrder(sc2.BotAI):
     def __init__(self, gameData, enemy_race):
         self.tree = self.constructTree(gameData, enemy_race)
         self.curr = self.tree
-    
+
     def constructTree(self, gameData, enemy_race):
         with open('buildOrder.json', 'r') as f:
             treeJSON = json.load(f)["buildOrder"]
             root = self.constructNode(treeJSON, treeJSON["l0"], gameData, enemy_race)
         return root
-        
+
     def constructNode(self, treeJSON, nodeJSON, gameData, enemy_race):
         children = []
         for child in nodeJSON["children"]:

@@ -5,22 +5,26 @@ class GoapPlanner:
 
 	# Plan what sequence of actions can fulfill the goal.
 	# Returns null if a plan could not be found, or a list of the actions that must be performed, in order, to fulfill the goal.
-	def plan(self, agent, actions, state, goal):
+	def plan(self, agent, actions, gameObject):
 
 		usableActions = []
 		for action in actions:
 			# reset the actions so we can start fresh with them
 			action.doReset()
 			# check what actions can run using their checkProceduralPrecondition
-			if action.checkProceduralPrecondition(agent):
+			print("checking preconditions for: ", action)
+			if action.checkProceduralPrecondition(gameObject, agent):
+				print('preconditions passed')
 				usableActions.append(action)
+				print('usable actions: ', usableActions)
 
 		# we now have all actions that can run, stored in usableActions
 
 		#build up the tree and record the leaf nodes that provide a solution to the goal.
 		leaves = []
-		root = self.Node(None, 0, state, None)
-		if not self.buildGraph(root, leaves, usableActions, goal):
+		root = self.Node(None, 0, agent.state, None)
+		print("Agent State: ", agent.state)
+		if not self.buildGraph(root, leaves, usableActions, gameObject.goal):
 			print("No available plan")
 			return
 
@@ -46,7 +50,7 @@ class GoapPlanner:
 		queue = []
 		for action in result:
 			queue.append(action)
-
+		print("returning action queue: ", queue)
 		return queue
 
 	class Node:
@@ -59,16 +63,23 @@ class GoapPlanner:
 	# Returns true if at least one solution was found.
 	# The possible paths are stored in the leaves list. Each leaf has a 'runningCost' value where the lowest cost will be the best action sequence.
 	def buildGraph(self, parent, leaves, actions, goal):
+		print('building graph')
+		print('remaining actions: ', actions)
 		found = False
 
 		# go through each action available at this node and see if we can use it here
 		for action in actions:
+			print("action: ", action)
 			# if the parent state has the conditions for this action's preconditions, we can use it here
+			print('parent state: ', parent.state)
+			print('action preconditions: ', action.preconditions)
+			print("are action conditions met?: ", self.areActionConditionsMet(action.preconditions, parent.state))
 			if self.areActionConditionsMet(action.preconditions, parent.state):
 				# apply the action's effects to the parent state
 				stateAfterAction = self.populateState(parent.state, action.effects)
-
+				print("potential state: ", stateAfterAction)
 				node = self.Node(parent, parent.cost + action.cost, stateAfterAction, action)
+				print('is goal met: ', self.isGoalMet(goal, stateAfterAction))
 				if self.isGoalMet(goal, stateAfterAction):
 					leaves.append(node)
 					found = True
@@ -99,11 +110,7 @@ class GoapPlanner:
 
 	# Apply the actionEffects to the currentState
 	def populateState(self, currentState, actionEffects):
-		updatedState = currentState
-		for effect in actionEffects:
-			currentState[effect] = actionEffects[effect]
-
-		return updatedState
+		return { **currentState, **actionEffects }
 
 	# Create a subset of the actions excluding removedAction. Creates a new set.
 	def actionSubset(self, actions, removedAction):
