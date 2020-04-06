@@ -32,11 +32,19 @@ The third is a finite state machine which manages the bot's econonmy.  It dynami
 The fourth is a Goal Orientied Action Planner, which is in charge of controlling units at a micro scale. It does so by utilizing four main pieces. 
 
 1. Agents:
-Each agent is in of defining their FSM and triggering each 'tick', as well as determining what actions it has available to perform.
+Each agent is in of defining their FSM and triggering each 'tick', as well as determining what actions it has available to perform. The following agents have been implemented:
+   - Adept: Early game unit used to apply early pressure to the opponent. Good against light enemies.
+   - Sentry: Unit which has many abilities, and is used to create hallucinations for scouting purposes.
+   - Phoenix: Flying unit which does bonus damage against light units. Also, hallucinations of this unit are usually used to scout. 
 2. Planner:
 Determines what sequence of actions it has to perform in order to meet the goal and determines what goal each agent should complete (this is yet to be implemented)
 3. Actions:
- Allow the planner to determine which sequence of actions to create by providing a list of preconditions and effects, as well as a cost associated with the action. It also includes the finer details of how the bot will execute each action.
+ Allow the planner to determine which sequence of actions to create by providing a list of preconditions and effects, as well as a cost associated with the action. It also includes the finer details of how the bot will execute each action. The following actions have been implemented:
+   - FindEnemyAction: As the name suggest, this action is used to attack the opposing team when the player has spotted any enemy units.
+   - AttackEnemyAction: Action which target specific enemy units, currently it simply pics the weakest unit.
+   - RetreatAction: This action allows the friendly unit to retreat while it's weapon is on cooldown or its health is criticially low.
+   - ScoutAction: Sends a hallucination unit to the enemy base
+   - ScoutHallucinationAction: Creates a hallucination for scouting purposes
 4. Finite State Machine:
 The FSM will place each agent into either an idle or a performAction state where it can calculate upcoming goals/plans or execture specific actions respectively.
 
