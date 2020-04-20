@@ -5,15 +5,13 @@ from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.upgrade_id import UpgradeId
 
 class lateGameFSM:
-    def __init__(self, enemy_race):
-        self.enemyRace = enemy_race
+    def __init__(self):
         self.counterDict = self.buildCounterDict()
 
     def buildCounterDict(self):
-        if self.enemyRace == Race.Zerg:
-            with open('lateGameCounters.json', 'r') as f:
-                counters = json.load(f)["zerg"]
-                return counters
+        with open('lateGameCounters.json', 'r') as f:
+            counters = json.load(f)["counters"]
+            return counters
         return {}
     
     def analyze_friendly_buildings(self, friendlyBuildings):
@@ -35,4 +33,3 @@ class lateGameFSM:
 
     def getInstructions(self, friendlyBuildings, enemyUnits, enemyBuildings):
         return set(self.analyze_enemy_counters(enemyUnits, enemyBuildings) + self.analyze_friendly_buildings(friendlyBuildings)) 
-        
