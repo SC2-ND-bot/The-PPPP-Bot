@@ -48,7 +48,6 @@ class PPPP(sc2.BotAI):
 		self.goalTriggers = {
 			"lastTimeScouting": time.time()
 		}
-		self.nexus_construct_time = 0
 
 	async def on_upgrade_complete(self, upgrade_id):
 		for unit_tag in self.agents:
@@ -75,6 +74,11 @@ class PPPP(sc2.BotAI):
 			await self.map_unitID_to_agent()
 			self.buildTree = buildOrder(self.game_data, self.enemy_race)
 			self.lateGameBuild = lateGameFSM(self.enemy_race)
+			self.scoutReset = 0
+			self.enemyUnitTrack = []
+			self.enemyBuildingTrack = []
+			self.nexus_construct_time = 0
+			self.lastDist = 0
 
 		bases = self.townhalls.ready
 		gas_buildings = self.gas_buildings.ready
@@ -112,10 +116,14 @@ class PPPP(sc2.BotAI):
 
 		######################################################################################################
 
-		# Logic for execution of build tree (Milestone 2)
+		# Building placement logic
 		map_center = self.game_info.map_center
-		position_towards_map_center = self.start_location.towards(map_center, distance=random.randint(0, 15))
-		if self.time < 450:
+		possible_placements = []
+		for nexus in self.townhalls:
+			possible_placements.append(nexus.position.towards(map_center, distance=15))
+		
+		# Logic for execution of build tree (Milestone 2)
+		if self.time < 360:
 			inst = self.buildTree.stepDown(self.minerals, self.vespene, self.supply_left, self.state)
 			if inst != None:
 				if inst[1] == 0: # A unit
@@ -128,51 +136,62 @@ class PPPP(sc2.BotAI):
 							self.buildTree.curr.executed = True
 				elif inst[1] == 1: # A building
 					if self.tech_requirement_progress(inst[0]) >= 1:
-						if await self.build(inst[0], near=position_towards_map_center, placement_step=1):
+						if await self.build(inst[0], near=random.choice(possible_placements), placement_step=3, random_alternative=False, max_distance=40):
 							self.buildTree.curr.executed = True
 				elif inst[1] == -1: # Research
 					if self.research(inst[0]):
 						self.buildTree.curr.executed = True
 
 		# Logic for execution of late-game build FSM (Milestone 4)
-		if self.time > 450:
-			toBuild = self.lateGameBuild.getInstructions(self.structures, self.enemy_units, self.enemy_structures)
+		if self.time > 360:
+			if self.time > self.scoutReset + 120 == 0:
+				self.enemyUnitTrack = []
+				self.enemyBuildingTrack = []
+				self.scoutReset = self.time
+			for unit in self.enemy_units:
+				if unit not in self.enemyUnitTrack:
+					self.enemyUnitTrack.append(unit)
+			for building in self.enemy_structures:
+				if building not in self.enemyBuildingTrack:
+					self.enemyBuildingTrack.append(building)
+			toBuild = self.lateGameBuild.getInstructions(self.structures, self.enemyUnitTrack, self.enemyBuildingTrack)
 			for inst in toBuild:
 				if inst[0] != UnitTypeId(0) and self.already_pending(inst[0]) == 0:
 					if inst[1] == "building":
-						await self.build(inst[0], near=position_towards_map_center, placement_step=1)
+						await self.build(inst[0], near=random.choice(possible_placements), placement_step=3, random_alternative=False, max_distance=40)
 					elif inst[1] == "unit":
 						self.train(inst[0])
 
 		# Logic for execution of economy FSM (Milestone 3)
 		if self.supply_left <= 3 and self.already_pending(UnitTypeId.PYLON) == 0:
-			await self.build(UnitTypeId.PYLON, near=position_towards_map_center, placement_step=1)
-		if self.supply_workers < len(self.townhalls) * 25 and self.supply_left > 5 and self.already_pending(UnitTypeId.PROBE) == 0:
-			nexus = random.choice(self.townhalls)
+			await self.build(UnitTypeId.PYLON, near=random.choice(possible_placements), placement_step=3, random_alternative=False, max_distance=40)
+		if self.supply_workers < self.get_max_workers() and self.supply_workers < 75 and self.supply_left > 3 and self.already_pending(UnitTypeId.PROBE) == 0:
+			nexus = self.townhalls[0]
 			self.do(nexus.train(UnitTypeId.PROBE), subtract_cost=True, subtract_supply=True)
 		for ass in self.gas_buildings:
-			if (ass.assigned_harvesters < 1 or (ass.assigned_harvesters < 3 and self.time > 180)) and self.already_pending(UnitTypeId.ASSIMILATOR) == 0 and self.already_pending(UnitTypeId.NEXUS) == 0:
-				worker = self.select_build_worker(position_towards_map_center)
+			if (ass.assigned_harvesters < 1 or (ass.assigned_harvesters < 3 and self.time > 180)) and ass.ideal_harvesters != 0 and self.already_pending(UnitTypeId.ASSIMILATOR) == 0 and self.already_pending(UnitTypeId.NEXUS) == 0:
+				worker = self.select_build_worker(self.start_location)
 				if worker is not None:
 					self.do(worker.gather(ass))
 		for nexus in self.townhalls:
 			geysers = self.vespene_geyser.closer_than(15, nexus)
 			for geyser in geysers:
-				if not self.gas_buildings.closer_than(1, geyser):
+				if not self.gas_buildings.closer_than(1, geyser) and not self.already_pending(UnitTypeId.ASSIMILATOR):
 					if not self.can_afford(UnitTypeId.ASSIMILATOR):
 						break
 					worker = self.select_build_worker(geyser.position)
 					if worker is None:
 						break
-					if not self.gas_buildings or not self.gas_buildings.closer_than(1, geyser):
+					if (not self.gas_buildings or not self.gas_buildings.closer_than(1, geyser)) and not self.already_pending(UnitTypeId.ASSIMILATOR):
 						self.do(worker.build(UnitTypeId.ASSIMILATOR, geyser), subtract_cost=True)
 						self.do(worker.stop(queue=True))
-						await self.distribute_workers()
 		if self.time > self.nexus_construct_time + 180 and len(self.townhalls) < 4:
 			exp = await self.get_next_expansion()
-			await self.build(UnitTypeId.NEXUS, exp)
-			self.nexus_construct_time = self.time
-			await self.distribute_workers()
+			if await self.build(UnitTypeId.NEXUS, exp):
+				self.nexus_construct_time = self.time
+		if self.time > self.lastDist + 60:
+			self.lastDist = self.time
+			await self.distribute_workers(2)
 
 	def resetAssignments(self):
 		for goal in self.unitAssignments:
@@ -245,6 +264,14 @@ class PPPP(sc2.BotAI):
 					visited.append(neighbor)
 					queue.append(neighbor)
 		return None
+
+	def get_max_workers(self):
+		maxWorkers = 0
+		for nexus in self.townhalls:
+			maxWorkers += nexus.ideal_harvesters
+		for assimilator in self.gas_buildings:
+			maxWorkers += assimilator.ideal_harvesters
+		return maxWorkers
 
 def main():
 	sc2.run_game(
