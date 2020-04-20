@@ -9,6 +9,7 @@ class FindEnemyAction(Action):
 		self.effects["attacking"] = True
 		self.effects["retreating"] = False
 		self.effects["defendBase"] = False
+		self.effects["surveillance"] = True
 
 	def __repr__(self):
 		return "Find Enemy Action Class"

@@ -1,26 +1,28 @@
 from actions.action import Action
 from sc2.ids.ability_id import AbilityId
-from sc2.ids.unit_typeid import UnitTypeId
 
 import time
 import math
 
-class CreateScoutingHallucinationAction(Action):
+class SurveillanceModeAction(Action):
 	def __init__(self):
 		super().__init__()
-		self.cost = 2
-		self.abilityId = AbilityId.HALLUCINATION_COLOSSUS
+		self.cost = 1
+		self.abilityId = AbilityId.MORPH_SURVEILLANCEMODE
 		self.effects["attacking"] = False
-		self.effects["hallucinationCreated"] = True
+		self.effects["surveillance"] = True
 
 	def __repr__(self):
-		return "Create Scouting Hallucination Action Class"
+		return "Create Surveillance Mode Action Class"
 
 	def reset(self):
 		return
 
 	def checkProceduralPrecondition(self, gameObject, agent):
-		#unit = agent.getUnit(gameObject)
+		unit = agent.getUnit(gameObject)
+		
+		if unit.distance_to(gameObject.enemy_start_locations[0]) > 3.0:
+			return False
 
 		return self.abilityId in agent.available_abilities
 

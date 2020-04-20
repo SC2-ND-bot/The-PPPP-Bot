@@ -21,6 +21,16 @@ from agents.sentryAgent import SentryAgent
 from agents.phoenixAgent import PhoenixAgent
 from agents.immortalAgent import ImmortalAgent
 from agents.stalkerAgent import StalkerAgent
+from agents.hightemplarAgent import HighTemplarAgent
+from agents.darktemplarAgent import DarkTemplarAgent
+from agents.voidrayAgent import VoidRayAgent
+from agents.observerAgent import ObserverAgent
+from agents.interceptorAgent import InterceptorAgent
+from agents.colossusAgent import ColossusAgent
+from agents.archonAgent import ArchonAgent
+from agents.mothershipAgent import MothershipAgent
+from agents.oracleAgent import OracleAgent
+from agents.tempestAgent import TempestAgent
 
 from FSM.state_machine import StateMachine
 from goapPlanner import GoapPlanner
@@ -34,49 +44,35 @@ class PPPP(sc2.BotAI):
 		self.path_coord_dict = {}
 		self.working_locations = {}
 		self.agents = {}
+		self.unit_agent_dict = {}
 		self.goalTriggers = {
 			"lastTimeScouting": time.time()
 		}
 		self.nexus_construct_time = 0
 
 	async def on_upgrade_complete(self, upgrade_id):
-		for unit in self.units:
-			self.getAgent(unit).goal = ('attacking', True)
+		for unit_tag in self.agents:
+			self.agents[unit_tag].goal = ('attacking', True)
 
 	async def on_unit_created(self, unit):
-		if unit.type_id == ADEPT:
-			print('made adept agent')
-			self.agents[unit.tag] = AdeptAgent(unit.tag, planner)
-		elif unit.type_id == ZEALOT:
-			print('made zealot agent')
-			self.agents[unit.tag] = ZealotAgent(unit.tag, planner)
-		elif unit.type_id == SENTRY:
-			print('made sentry agent')
-			self.agents[unit.tag] = SentryAgent(unit.tag, planner)
-		elif unit.type_id == IMMORTAL:
-			print('made immortal agent')
-			self.agents[unit.tag] = ImmortalAgent(unit.tag, planner)
-		elif unit.type_id == PHOENIX:
-			print('made phoenix agent')
-			self.agents[unit.tag] = PhoenixAgent(unit.tag, planner)
-		elif unit.type_id == STALKER:
-			print('made stalker agent')
-			self.agents[unit.tag] = StalkerAgent(unit.tag, planner)
-		else:
-			print('made default agent')
-			self.agents[unit.tag] = ZealotAgent(unit.tag, planner)
+		try:
+			self.agents[unit.tag] = self.unit_agent_dict[unit.type_id](unit.tag, planner)
+			print("Made " + str(unit.type_id) + " agent")
+		except:
+			return
 
 	def getAgent(self, unit):
 		try:
 			return self.agents[unit.tag]
 		except:
 			print('unable to get unit: ', unit)
-			return
+			return None
 
 	async def on_step(self, iteration):
 		if iteration == 0:
 			await self.chat_send("(probe)(pylon)(cannon)(cannon)(gg)")
 			await self.build_coord_dict()
+			await self.map_unitID_to_agent()
 			self.buildTree = buildOrder(self.game_data, self.enemy_race)
 			self.lateGameBuild = lateGameFSM(self.enemy_race)
 
@@ -96,20 +92,23 @@ class PPPP(sc2.BotAI):
 
 		# Manages agents
 
-		army_units = self.units.filter(lambda unit: unit.type_id != PROBE)
+		army_units = self.units.filter(lambda unit: unit.type_id != UnitTypeId.PROBE)
 		for unit in army_units:
-			if unit.health_percentage < 0.50 and unit.shield_percentage < 0.75:
-				self.getAgent(unit).goal = ('retreating', True)
-			elif unit.type_id == ADEPT:
-				if self.units(ADEPT).amount > 2:
-					self.getAgent(unit).goal = ('attacking', True)
-			elif unit.type_id == SENTRY and unit.energy > 75:
-				if time.time() - self.goalTriggers["lastTimeScouting"] > 45:
-					self.getAgent(unit).goal = ('hallucinationCreated', True)
-					self.goalTriggers['lastTimeScouting'] = time.time()
-			elif unit.type_id == PHOENIX and unit.is_hallucination:
-				self.getAgent(unit).goal = ('scouting', True)
-			self.getAgent(unit).stateMachine.run_step(self)
+			agent = self.getAgent(unit)
+			if agent is not None:
+				agent.available_abilities = (await self.get_available_abilities([unit], ignore_resource_requirements=False))[0]
+				if unit.health_percentage < 0.50 and unit.shield_percentage < 0.75:
+					agent.goal = ('retreating', True)
+				elif unit.type_id == UnitTypeId.ADEPT:
+					if self.units(UnitTypeId.ADEPT).amount > 2:
+						agent.goal = ('attacking', True)
+				elif unit.type_id == UnitTypeId.SENTRY:
+					if time.time() - self.goalTriggers["lastTimeScouting"] > 45:
+						agent.goal = ('hallucinationCreated', True)
+						self.goalTriggers['lastTimeScouting'] = time.time()
+				elif unit.type_id == UnitTypeId.PHOENIX and unit.is_hallucination:
+					agent.goal = ('scouting', True)
+				agent.stateMachine.run_step(self)
 
 		######################################################################################################
 
@@ -193,6 +192,25 @@ class PPPP(sc2.BotAI):
 							self.path_coord_dict[(i,j)].append(z)
 		print("build_coord_dict() FINISHED!")
 
+	async def map_unitID_to_agent(self):
+		self.unit_agent_dict = {
+			ADEPT: AdeptAgent,
+			ZEALOT: ZealotAgent,
+			SENTRY: SentryAgent,
+			IMMORTAL: ImmortalAgent,
+			PHOENIX: PhoenixAgent,
+			STALKER: StalkerAgent,
+			HIGHTEMPLAR: HighTemplarAgent,
+			DARKTEMPLAR: DarkTemplarAgent,
+			VOIDRAY: VoidRayAgent,
+			OBSERVER: ObserverAgent,
+			INTERCEPTOR: InterceptorAgent,
+			COLOSSUS: ColossusAgent,
+			ARCHON: ArchonAgent,
+			MOTHERSHIP: MothershipAgent,
+			ORACLE: OracleAgent,
+			TEMPEST: TempestAgent
+		}
 
 	def go_to_work(self, worker):
 		x_coord = math.floor(worker.position.x)

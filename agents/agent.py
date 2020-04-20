@@ -9,6 +9,7 @@ class Agent:
 		self.stateMachine = StateMachine()
 		self.planner = planner
 
+		available_abilities = []
 		self.availableActions = [FindChokePoint()]
 		self.plannedActions = []
 		self.currentAction = None
@@ -29,6 +30,7 @@ class Agent:
 
 	def idleStateHandler(self, gameObject):
 		plan = self.planner.plan(self, self.availableActions, gameObject)
+
 		if plan is not None:
 			self.plannedActions = plan
 			return "PERFORM_ACTIONS_STATE"

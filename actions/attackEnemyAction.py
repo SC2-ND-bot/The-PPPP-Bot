@@ -27,14 +27,18 @@ class AttackEnemyAction(Action):
 			return False
 
 		enemies = gameObject.enemy_units()
-		enemies_unit_can_attack = enemies.in_attack_range_of(unit, 0)
+		unit_attack_range = max(unit.ground_range, unit.air_range)
+		
+		enemies_unit_can_attack = enemies.in_attack_range_of(unit, (unit.sight_range - unit_attack_range))
 
 		enemy_to_attack = None
 		for enemy in enemies_unit_can_attack:
 			if enemy_to_attack is None:
 				enemy_to_attack = enemy
+			elif enemy_to_attack.is_structure and not enemy.is_structure:
+				enemy_to_attack = enemy
 			else:
-				if enemy_to_attack.shield_health_percentage > enemy.shield_health_percentage:
+				if enemy_to_attack.shield_health_percentage > enemy.shield_health_percentage and not enemy.is_structure:
 					enemy_to_attack = enemy
 
 		self.enemy = enemy_to_attack
