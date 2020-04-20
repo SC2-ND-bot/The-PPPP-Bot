@@ -73,7 +73,7 @@ class PPPP(sc2.BotAI):
 			await self.build_coord_dict()
 			await self.map_unitID_to_agent()
 			self.buildTree = buildOrder(self.game_data, self.enemy_race)
-			self.lateGameBuild = lateGameFSM(self.enemy_race)
+			self.lateGameBuild = lateGameFSM()
 			self.scoutReset = 0
 			self.enemyUnitTrack = []
 			self.enemyBuildingTrack = []
