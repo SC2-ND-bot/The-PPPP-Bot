@@ -29,7 +29,7 @@ The second is a finite state machine which controls all army and structure produ
 
 The third is a finite state machine which manages the bot's econonmy.  It dynamically evaluates the game state to determien when to build probes, assimilators, expansions, and pylons.  It also works to properly distribute workers in order to maintain the optimal ratio of mineral to gas resource gathering.
 
-The fourth is a Goal Orientied Action Planner, which is in charge of controlling units at a micro scale. It does so by utilizing four main pieces. 
+The fourth is a Goal Orientied Action Planner, which is in charge of controlling units at a micro scale. It does so by utilizing five main pieces. 
 
 1. Agents:
 Each agent is in of defining their FSM and triggering each 'tick', as well as determining what actions it has available to perform. The following agents have been implemented:
@@ -46,10 +46,18 @@ Determines what sequence of actions it has to perform in order to meet the goal 
    - FindEnemyAction: As the name suggest, this action is used to attack the opposing team when the player has spotted any enemy units.
    - AttackEnemyAction: Action which target specific enemy units, currently it simply pics the weakest unit.
    - RetreatAction: This action allows the friendly unit to retreat while it's weapon is on cooldown or its health is criticially low.
-   - ScoutAction: Sends a hallucination unit to the enemy base
-   - ScoutHallucinationAction: Creates a hallucination for scouting purposes
+   - FindChokePoint: This actions returns a defensive location which units can hold to prevent enemies from critically damaging our structures.
+   - HallucionationScoutAction: Sends a hallucination unit to the enemy base to scout
+   - CreateScoutingHallucinationAction: Creates a hallucination using sentry agents that will be used for scouting purposes
 4. Finite State Machine:
 The FSM will place each agent into either an idle or a performAction state where it can calculate upcoming goals/plans or execture specific actions respectively.
+5. Goals:
+   These goals determine what actions are considered to be usable actions. Each agent's task is always to reach this goal. Every agent can have a distinct goal from one another.
+   - Attacking
+   - DefendBase
+   - HallucinationCreated
+   - Retreating
+   - Scouting
 
 A lot of the unit specific work related to the GOAP is yet to be implemented, however the groundwork has been established so that now unit specific code can be written modularly. Currently the Protoss units that have been integrated as agents are Zealots, Adepts, Sentries, Stalkers, Phoenixes, and Immortals.
 
