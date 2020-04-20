@@ -7,7 +7,7 @@ import math
 class OffensiveHallucinationAction(Action):
 	def __init__(self):
 		super().__init__()
-		self.cost = 2.0
+		self.cost = 3.0
         self.hallucinationId = None
 
 		self.preconditions["attacking"] = True
@@ -23,18 +23,10 @@ class OffensiveHallucinationAction(Action):
 		unit = agent.getUnit(gameObject)
         energy = unit.energy
 
-        if unit.energy < 75:
-            return False
+        if unit.energy < 75 or unit.type_id != UnitTypeId.SENTRY:
+			return False
 
-        lastScout = agent.state["lastScoutTimestamp"]
-        currentTimestamp = time.time()
-
-        if currentTimestamp - lastScout > 45:
-            self.effects['lastScoutTimestamp'] = currentTimestamp
-            self.hallucinationId = AbilityId.HALLUCINATION_PHOENIX
-
-            # HALLUCINATION_COLOSSUS
-            # HALLUCINATION_ADEPT
+        self.hallucinationId = AbilityId.HALLUCINATION_COLOSSUS
 
 		return self.hallucinationId is not None
 

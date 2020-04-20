@@ -1,7 +1,6 @@
 class GoapPlanner:
 	def __init__(self):
 		print('planner was created')
-		# TODO: add needed variables, etc.
 
 	# Plan what sequence of actions can fulfill the goal.
 	# Returns null if a plan could not be found, or a list of the actions that must be performed, in order, to fulfill the goal.
@@ -20,8 +19,7 @@ class GoapPlanner:
 		#build up the tree and record the leaf nodes that provide a solution to the goal.
 		leaves = []
 		root = self.Node(None, 0, agent.state, None)
-		if not self.buildGraph(root, leaves, usableActions, gameObject.goal):
-			print("No available plan")
+		if not self.buildGraph(root, leaves, usableActions, agent.goal):
 			return
 
 		# get the cheapest leaf node
@@ -46,7 +44,6 @@ class GoapPlanner:
 		queue = []
 		for action in result:
 			queue.append(action)
-		#print("returning action queue: ", queue)
 		return queue
 
 	class Node:

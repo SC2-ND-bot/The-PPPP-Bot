@@ -1,17 +1,12 @@
 from actions.action import Action
-from sc2.position import Point2, Point3
 
-import time
-import math
-
-class Scout(Action):
+class HallucinationScoutAction(Action):
 	def __init__(self):
 		super().__init__()
 		self.cost = 2.0
 		self.scoutLocations = None
 
-		self.preconditions["hallucinationCreated"] = True
-		self.effects["scouted"] = True
+		self.effects["scouting"] = True
 
 	def __repr__(self):
 		return "Hallucination Action Class"

@@ -5,7 +5,7 @@ import math
 class RetreatAction(Action):
 	def __init__(self):
 		super().__init__()
-		self.cost = -0.5
+		self.cost = 0.5
 		self.retreatLocation = None
 
 		self.effects["retreating"] = True
@@ -25,7 +25,7 @@ class RetreatAction(Action):
 		unit = agent.getUnit(gameObject)
 		weapon_cooldown = min(unit.weapon_cooldown, 1.61)
 		speed = unit.movement_speed
-		distance_to_travel = (speed * weapon_cooldown)/2
+		distance_to_travel = (speed * weapon_cooldown)
 
 		enemies = gameObject.enemy_units()
 
