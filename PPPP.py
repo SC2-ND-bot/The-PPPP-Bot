@@ -40,9 +40,7 @@ class PPPP(sc2.BotAI):
 		self.nexus_construct_time = 0
 
 	async def on_upgrade_complete(self, upgrade_id):
-		print("upgrade completed")
 		for unit in self.units:
-			print('switching goal to attacking')
 			self.getAgent(unit).goal = ('attacking', True)
 
 	async def on_unit_created(self, unit):
@@ -102,21 +100,15 @@ class PPPP(sc2.BotAI):
 		for unit in army_units:
 			if unit.health_percentage < 0.50 and unit.shield_percentage < 0.75:
 				self.getAgent(unit).goal = ('retreating', True)
-				print('switching goal to retreating')
 			elif unit.type_id == ADEPT:
 				if self.units(ADEPT).amount > 2:
-					print('switching goal to attacking')
 					self.getAgent(unit).goal = ('attacking', True)
 			elif unit.type_id == SENTRY and unit.energy > 75:
 				if time.time() - self.goalTriggers["lastTimeScouting"] > 45:
-					print('switching goal to hallucinationCreated')
 					self.getAgent(unit).goal = ('hallucinationCreated', True)
 					self.goalTriggers['lastTimeScouting'] = time.time()
 			elif unit.type_id == PHOENIX and unit.is_hallucination:
-				print('switching goal to scouting')
 				self.getAgent(unit).goal = ('scouting', True)
-			print("unit: ", unit)
-			print("goal: ", self.getAgent(unit).goal)
 			self.getAgent(unit).stateMachine.run_step(self)
 
 		######################################################################################################

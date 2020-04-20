@@ -7,7 +7,6 @@ from actions.createScoutingHallucinationAction import CreateScoutingHallucinatio
 class SentryAgent(Agent):
 	def __init__(self, unitTag=None, planner=None):
 		super().__init__(unitTag, planner)
-		self.last_shield_health_percentage = 1.0
 		self.state = {
 			"canAttack": True,
 			"attacking": False,

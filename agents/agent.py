@@ -13,7 +13,6 @@ class Agent:
 		self.plannedActions = []
 		self.currentAction = None
 		self.state = {}
-		print('switching goal to defendBase')
 		self.goal = ('defendBase', True)
 
 		self.stateMachine.add_state("IDLE_STATE", self.idleStateHandler)
