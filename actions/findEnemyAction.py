@@ -8,9 +8,10 @@ class FindEnemyAction(Action):
 
 		self.effects["attacking"] = True
 		self.effects["retreating"] = False
+		self.effects["defendBase"] = False
 
 	def __repr__(self):
-		return "Attack Move Action Class"
+		return "Find Enemy Action Class"
 
 	# def calcCost(self):
 	# 	# determine the cost for this action

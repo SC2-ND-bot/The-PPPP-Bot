@@ -1,5 +1,7 @@
 import random
 import math
+import time
+
 import sc2
 from buildOrder import buildtreeNode
 from buildOrder import buildOrder
@@ -12,6 +14,7 @@ from sc2.position import Point2, Point3
 from buildOrder import buildOrder
 from buildOrder import buildtreeNode
 
+from agents.agent import Agent
 from agents.adeptAgent import AdeptAgent
 from agents.zealotAgent import ZealotAgent
 from agents.sentryAgent import SentryAgent
@@ -22,6 +25,8 @@ from agents.stalkerAgent import StalkerAgent
 from FSM.state_machine import StateMachine
 from goapPlanner import GoapPlanner
 
+from sc2.data import Alert
+
 planner = GoapPlanner()
 
 class PPPP(sc2.BotAI):
@@ -29,11 +34,16 @@ class PPPP(sc2.BotAI):
 		self.path_coord_dict = {}
 		self.working_locations = {}
 		self.agents = {}
-		self.worldState = {}
+		self.goalTriggers = {
+			"lastTimeScouting": time.time()
+		}
 		self.nexus_construct_time = 0
-		self.goal = ('attacking', True)
 
-	def create_agent(self, unit):
+	async def on_upgrade_complete(self, upgrade_id):
+		for unit in self.units:
+			self.getAgent(unit).goal = ('attacking', True)
+
+	async def on_unit_created(self, unit):
 		if unit.type_id == ADEPT:
 			print('made adept agent')
 			self.agents[unit.tag] = AdeptAgent(unit.tag, planner)
@@ -52,6 +62,16 @@ class PPPP(sc2.BotAI):
 		elif unit.type_id == STALKER:
 			print('made stalker agent')
 			self.agents[unit.tag] = StalkerAgent(unit.tag, planner)
+		else:
+			print('made default agent')
+			self.agents[unit.tag] = ZealotAgent(unit.tag, planner)
+
+	def getAgent(self, unit):
+		try:
+			return self.agents[unit.tag]
+		except:
+			print('unable to get unit: ', unit)
+			return
 
 	async def on_step(self, iteration):
 		if iteration == 0:
@@ -59,6 +79,7 @@ class PPPP(sc2.BotAI):
 			await self.build_coord_dict()
 			self.buildTree = buildOrder(self.game_data, self.enemy_race)
 			self.lateGameBuild = lateGameFSM(self.enemy_race)
+
 		bases = self.townhalls.ready
 		gas_buildings = self.gas_buildings.ready
 		for resource in bases | gas_buildings:
@@ -70,39 +91,25 @@ class PPPP(sc2.BotAI):
 		for worker in self.workers:
 			if worker.is_idle:
 				self.go_to_work(worker)
+
 		#####################################################################################################
 
-		# Creates and Manages agents
-		for unit in self.units(ADEPT).ready:
-			if not self.agents.get(unit.tag, False):
-				self.create_agent(unit)
-			else:
-				self.agents[unit.tag].stateMachine.run_step(self)
-		for unit in self.units(ZEALOT).ready:
-			if not self.agents.get(unit.tag, False):
-				self.create_agent(unit)
-			else:
-				self.agents[unit.tag].stateMachine.run_step(self)
-		for unit in self.units(SENTRY).ready:
-			if not self.agents.get(unit.tag, False):
-				self.create_agent(unit)
-			else:
-				self.agents[unit.tag].stateMachine.run_step(self)
-		for unit in self.units(IMMORTAL).ready:
-			if not self.agents.get(unit.tag, False):
-				self.create_agent(unit)
-			else:
-				self.agents[unit.tag].stateMachine.run_step(self)
-		for unit in self.units(PHOENIX).ready:
-			if not self.agents.get(unit.tag, False):
-				self.create_agent(unit)
-			else:
-				self.agents[unit.tag].stateMachine.run_step(self)
-		for unit in self.units(STALKER).ready:
-			if not self.agents.get(unit.tag, False):
-				self.create_agent(unit)
-			else:
-				self.agents[unit.tag].stateMachine.run_step(self)
+		# Manages agents
+
+		army_units = self.units.filter(lambda unit: unit.type_id != PROBE)
+		for unit in army_units:
+			if unit.health_percentage < 0.50 and unit.shield_percentage < 0.75:
+				self.getAgent(unit).goal = ('retreating', True)
+			elif unit.type_id == ADEPT:
+				if self.units(ADEPT).amount > 2:
+					self.getAgent(unit).goal = ('attacking', True)
+			elif unit.type_id == SENTRY and unit.energy > 75:
+				if time.time() - self.goalTriggers["lastTimeScouting"] > 45:
+					self.getAgent(unit).goal = ('hallucinationCreated', True)
+					self.goalTriggers['lastTimeScouting'] = time.time()
+			elif unit.type_id == PHOENIX and unit.is_hallucination:
+				self.getAgent(unit).goal = ('scouting', True)
+			self.getAgent(unit).stateMachine.run_step(self)
 
 		######################################################################################################
 
@@ -168,6 +175,10 @@ class PPPP(sc2.BotAI):
 			self.nexus_construct_time = self.time
 			await self.distribute_workers()
 
+	def resetAssignments(self):
+		for goal in self.unitAssignments:
+			self.unitAssignments[goal] = 0
+
 	async def build_coord_dict(self):
 		path_matrix = self.game_info.pathing_grid.data_numpy
 		mheight = len(path_matrix)
@@ -181,28 +192,6 @@ class PPPP(sc2.BotAI):
 						if path_matrix[z] == 1:
 							self.path_coord_dict[(i,j)].append(z)
 		print("build_coord_dict() FINISHED!")
-
-	async def build_worldState_dict(self):
-		self.worldState['minerals'] = self.minerals # Resources
-		self.worldState['vespene'] = self.vespene
-		self.worldState['warp_gate_count'] = self.warp_gate_count
-		self.worldState['army_count'] = self.army_count
-		self.worldState['workers'] = self.workers
-		self.worldState['townhalls'] = self.townhalls # Your townhalls (nexus, hatchery, etc.)
-		self.worldState['gas_buildings'] = self.gas_buildings # Your gas structures (refinery, extractor, etc.)
-		self.worldState['units'] = self.units # Your units (includes larva and workers)
-		self.worldState['structures'] = self.structures # Your structures (includes townhalls and gas buildings)
-		self.worldState['start_location'] = self.start_location # Your spawn location (your first townhall location)
-		self.worldState['main_base_ramp'] = self.main_base_ramp # Location of your main base ramp
-		self.worldState['enemy_units'] = self.enemy_units # The following contains enemy units and structures inside your units' vision range
-		self.worldState['enemy_structures'] = self.enemy_structures
-		self.worldState['enemy_start_location'] = self.enemy_start_location # Enemy spawn locations as a list of Point2 points
-		self.worldState['blips'] = self.blips # Enemy units that are inside your sensor tower range
-		self.worldState['enemy_race'] = self.enemy_race
-		self.worldState['mineral_field'] = self.mineral_field # All mineral fields on the map
-		self.worldState['vespene_geyser'] = self.vespene_geyser # All vespene fields, even those that have a gas building on them
-		self.worldState['expansion_locations'] = self.expansion_locations # Locations of possible expansions
-		self.worldState['destructables'] = self.destructables # All destructable rocks (except the platforms below the main base ramp)
 
 
 	def go_to_work(self, worker):
@@ -242,7 +231,7 @@ class PPPP(sc2.BotAI):
 def main():
 	sc2.run_game(
 		sc2.maps.get("AcropolisLE"),
-		[Bot(Race.Protoss, PPPP(), name="The PPPP"), Computer(Race.Zerg, Difficulty.VeryEasy)],
+		[Bot(Race.Protoss, PPPP(), name="The PPPP"), Computer(Race.Zerg, Difficulty.Easy)],
 		realtime=False,
 	)
 

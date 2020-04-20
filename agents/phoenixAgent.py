@@ -2,7 +2,7 @@ from agents.agent import Agent
 from actions.findEnemyAction import FindEnemyAction
 from actions.attackEnemyAction import AttackEnemyAction
 from actions.retreatAction import RetreatAction
-from actions.scoutHallucinationAction import ScoutHallucinationAction
+from actions.hallucinationScoutAction import HallucinationScoutAction
 
 class PhoenixAgent(Agent):
 	def __init__(self, unitTag=None, planner=None):
@@ -14,7 +14,8 @@ class PhoenixAgent(Agent):
 			"underAttack": False,
 			"lastScoutTimestamp": None,
 			"health_critical": False,
-			"retreating": False
+			"retreating": False,
+			"scouting": False
 		}
 
 		# ADEPTPHASESHIFT_ADEPTPHASESHIFT = 2544
@@ -24,7 +25,7 @@ class PhoenixAgent(Agent):
 		self.availableActions.append(FindEnemyAction())
 		self.availableActions.append(AttackEnemyAction())
 		self.availableActions.append(RetreatAction())
-		self.availableActions.append(ScoutHallucinationAction())
+		self.availableActions.append(HallucinationScoutAction())
 
 	def isPlanInvalid(self, gameObject):
 		# Add additional checks that should abort plan, like is_under_attack

@@ -2,19 +2,18 @@ from agents.agent import Agent
 from actions.findEnemyAction import FindEnemyAction
 from actions.attackEnemyAction import AttackEnemyAction
 from actions.retreatAction import RetreatAction
-from actions.scout import Scout
+from actions.createScoutingHallucinationAction import CreateScoutingHallucinationAction
 
 class SentryAgent(Agent):
 	def __init__(self, unitTag=None, planner=None):
 		super().__init__(unitTag, planner)
-		self.last_shield_health_percentage = 1.0
 		self.state = {
 			"canAttack": True,
 			"attacking": False,
 			"underAttack": False,
 			"lastScoutTimestamp": None,
 			"health_critical": False,
-			"retreating": False
+			"retreating": False,
 		}
 
 		# ADEPTPHASESHIFT_ADEPTPHASESHIFT = 2544
@@ -23,8 +22,7 @@ class SentryAgent(Agent):
 
 		self.availableActions.append(FindEnemyAction())
 		self.availableActions.append(AttackEnemyAction())
-		self.availableActions.append(RetreatAction())
-		self.availableActions.append(Scout())
+		self.availableActions.append(CreateScoutingHallucinationAction())
 
 	def isPlanInvalid(self, gameObject):
 		# Add additional checks that should abort plan, like is_under_attack

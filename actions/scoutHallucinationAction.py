@@ -14,7 +14,7 @@ class ScoutHallucinationAction(Action):
 		self.effects["hallucinationCreated"] = True
 
 	def __repr__(self):
-		return "Hallucination Action Class"
+		return "Scout Hallucination Action Class"
 
 	def reset(self):
 		self.hallucinationId = None
