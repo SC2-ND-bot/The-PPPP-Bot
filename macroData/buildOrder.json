@@ -1,0 +1,417 @@
+{
+    "buildOrder": {
+        "l0": {
+            "contents": 60,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["l1"]
+        },
+        "l1": {
+            "contents": 62,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl2"]
+        },
+        "zl2": {
+            "contents": 62,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl3"]
+        },
+        "zl3": {
+            "contents": 72,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl4"]
+        },
+        "zl4": {
+            "contents": 73,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl5"]
+        },
+        "zl5": {
+            "contents": 311,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl6"]
+        },
+        "zl6": {
+            "contents": 311,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl7"]
+        },
+        "zl7": {
+            "contents": 311,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl8"]
+        },
+        "zl8": {
+            "contents": 71,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl9"]
+        },
+        "zl9": {
+            "contents": 77,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl10"]
+        },
+        "zl10": {
+            "contents": 73,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl12"]
+        },
+        "zl12": {
+            "contents": 83,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl13"]
+        },
+        "zl13": {
+            "contents": 63,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl14"]
+        },
+        "zl14": {
+            "contents": 39,
+            "type": -1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl14.5"]
+        },
+        "zl14.5": {
+            "contents": 67,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl15"]
+        },
+        "zl15": {
+            "contents": 78,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl16"]
+        },
+        "zl16": {
+            "contents": 70,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl18"]
+        },
+        "zl18": {
+            "contents": 77,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl19"]
+        },
+        "zl19": {
+            "contents": 77,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl20"]
+        },
+        "zl20": {
+            "contents": 82,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl21"]
+        },
+        "zl21": {
+            "contents": 77,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl22"]
+        },
+        "zl22": {
+            "contents": 77,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl23"]
+        },
+        "zl23": {
+            "contents": 40,
+            "type": -1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl24"]
+        },
+        "zl24": {
+            "contents": 4,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl25"]
+        },
+        "zl25": {
+            "contents": 65,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl26"]
+        },
+        "zl26": {
+            "contents": 62,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl27"]
+        },
+        "zl27": {
+            "contents": 62,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl28"]
+        },
+        "zl28": {
+            "contents": 62,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl29"]
+        },
+        "zl29": {
+            "contents": 68,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl30"]
+        },
+        "zl30": {
+            "contents": 86,
+            "type": -1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl31"]
+        },
+        "zl31": {
+            "contents": 62,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl32"]
+        },
+        "zl32": {
+            "contents": 62,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl33"]
+        },
+        "zl33": {
+            "contents": 62,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl34"]
+        },
+        "zl34": {
+            "contents": 75,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl35"]
+        },
+        "zl35": {
+            "contents": 75,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl36"]
+        },
+        "zl36": {
+            "contents": 73,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl37"]
+        },
+        "zl37": {
+            "contents": 73,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl38"]
+        },
+        "zl38": {
+            "contents": 73,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl39"]
+        },
+        "zl39": {
+            "contents": 75,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl40"]
+        },
+        "zl40": {
+            "contents": 75,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl41"]
+        },
+        "zl41": {
+            "contents": 75,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl42"]
+        },
+        "zl42": {
+            "contents": 75,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl43"]
+        },
+        "zl43": {
+            "contents": 73,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl44"]
+        },
+        "zl44": {
+            "contents": 73,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl45"]
+        },
+        "zl45": {
+            "contents": 73,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl46"]
+        },
+        "zl46": {
+            "contents": 73,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl47"]
+        },
+        "zl47": {
+            "contents": 73,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl48"]
+        },
+        "zl48": {
+            "contents": 73,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl49"]
+        },
+        "zl49": {
+            "contents": 75,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl50"]
+        },
+        "zl50": {
+            "contents": 75,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl51"]
+        },
+        "zl51": {
+            "contents": 82,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl52"]
+        },
+        "zl52": {
+            "contents": 75,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl53"]
+        },
+        "zl53": {
+            "contents": 75,
+            "type": 0,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl54"]
+        },
+        "zl54": {
+            "contents": 66,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl55"]
+        },
+        "zl55": {
+            "contents": 66,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl56"]
+        },
+        "zl56": {
+            "contents": 62,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl57"]
+        },
+        "zl57": {
+            "contents": 62,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl58"]
+        },
+        "zl58": {
+            "contents": 71,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": ["zl59"]
+        },
+        "zl59": {
+            "contents": 63,
+            "type": 1,
+            "time": 0,
+            "conditions": [],
+            "children": []
+        }
+    }
+}

@@ -48,7 +48,7 @@ class buildOrder(sc2.BotAI):
         self.curr = self.tree
 
     def constructTree(self, gameData, enemy_race):
-        with open('buildOrder.json', 'r') as f:
+        with open('./macroData/buildOrder.json', 'r') as f:
             treeJSON = json.load(f)["buildOrder"]
             root = self.constructNode(treeJSON, treeJSON["l0"], gameData, enemy_race)
         return root

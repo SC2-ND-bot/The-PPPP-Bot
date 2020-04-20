@@ -53,6 +53,15 @@ The FSM will place each agent into either an idle or a performAction state where
 
 A lot of the unit specific work related to the GOAP is yet to be implemented, however the groundwork has been established so that now unit specific code can be written modularly. Currently the Protoss units that have been integrated as agents are Zealots, Adepts, Sentries, Stalkers, Phoenixes, and Immortals.
 
+## Further Development
+
+For anyone wishing to continue development on this project there are several places where improvements can be made:
+- Expand G.O.A.P. goals and actions to allow for more diverse micro play by the bot
+- Expand the variety and specificity of agents using GOAP so that each unit can be used according to its strengths
+- Write a more complex worker distribution algorithm to maximize the efficiency of the economy
+- Implement more build orders so that the bot has more strategic options
+- Add to the build functionality so that it utilizes special functions such as Chrono Boost or Warp Gates
+
 ## Dependancies
 
 Dependancies are listed below.  See the installation section for instructions on how to install them.
