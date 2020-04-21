@@ -10,6 +10,7 @@ class FindChokePoint(Action):
 
 		self.effects["defendBase"] = True
 		self.effects["attacking"] = False
+		self.effects["retreating"] = False
 
 	def __repr__(self):
 		return "Find Choke Point Class"
@@ -33,11 +34,14 @@ class FindChokePoint(Action):
 
 
 	def checkProceduralPrecondition(self, gameObject, agent):
-		nearestNexus = gameObject.townhalls().closest_to(gameObject.enemy_start_locations[0])
-		x, y = self.calc_defensive_position(nearestNexus, gameObject.enemy_start_locations[0], 11)
+		if gameObject.townhalls() is not None:
+			nearestNexus = gameObject.townhalls().closest_to(gameObject.enemy_start_locations[0])
+			x, y = self.calc_defensive_position(nearestNexus, gameObject.enemy_start_locations[0], 11)
+		else:
+			return False
 
 		self.defensivePosition = Point2((x, y))
-		if agent.getUnit(gameObject).distance_to(self.defensivePosition) < 15:
+		if agent.getUnit(gameObject).distance_to(self.defensivePosition) < 10:
 			return False
 
 		return self.defensivePosition is not None

@@ -9,13 +9,14 @@ class FeedbackAction(Action):
 		self.cost = 2.0
 		self.target = None
 		self.abilityId = AbilityId.FEEDBACK_FEEDBACK
-		
+
 		self.effects['attacking'] = True
-		
+
 		susceptible_targets = {
 			'Protoss': [HIGHTEMPLAR, SENTRY, PHOENIX, ORACLE, MOTHERSHIP, MOTHERSHIPCORE],
 			'Terran': [GHOST, THOR, BANSHEE, MEDIVAC, BATTLECRUISER, RAVEN, POINTDEFENSEDRONE],
 			'Zerg': [INFESTOR, OVERSEER, QUEEN, VIPER]
+			# Random is also possible, but not necessary right now
 		}
 
 	def __repr__(self):
@@ -27,15 +28,13 @@ class FeedbackAction(Action):
 
 	def checkProceduralPrecondition(self, gameObject, agent):
 		unit = agent.getUnit(gameObject)
-		
-		print(agent.available_abilities)
-		
+
 		if self.abilityId not in agent.available_abilities:
 			print("Can cast feedback: False")
 			return False
-		
+
 		print("Can cast feedback: True")
-		
+
 		enemies = gameObject.enemy_units()
 		enemies_in_sight = enemies.closer_than(unit.sight_range, unit.position)
 
@@ -49,7 +48,7 @@ class FeedbackAction(Action):
 					else:
 						if enemy.energy_percentage > target.energy_percentage:
 							target = enemy
-		
+
 
 		self.target = target
 

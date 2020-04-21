@@ -20,7 +20,7 @@ class SurveillanceModeAction(Action):
 
 	def checkProceduralPrecondition(self, gameObject, agent):
 		unit = agent.getUnit(gameObject)
-		
+
 		if unit.distance_to(gameObject.enemy_start_locations[0]) > 3.0:
 			return False
 

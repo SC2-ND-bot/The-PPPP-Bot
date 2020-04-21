@@ -28,7 +28,7 @@ class HighTemplarAgent(Agent):
 	def isPlanInvalid(self, gameObject):
 		# Add additional checks that should abort plan, like is_under_attack
 		unit = self.getUnit(gameObject)
-		#print('health critical and not retreating: ', self.state["health_critical"] and not self.state["retreating"])
+		
 		return self.state["health_critical"] and not self.state["retreating"]
 
 	# Requires further changes, not working right now

@@ -18,7 +18,6 @@ class ZealotAgent(Agent):
 
 		self.availableActions.append(FindEnemyAction())
 		self.availableActions.append(AttackEnemyAction())
-		self.availableActions.append(RetreatAction())
 		self.availableActions.append(ChargeAction())
 
 	def isPlanInvalid(self, gameObject):

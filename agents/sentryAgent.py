@@ -16,10 +16,6 @@ class SentryAgent(Agent):
 			"retreating": False,
 		}
 
-		# ADEPTPHASESHIFT_ADEPTPHASESHIFT = 2544
-		# CANCEL_ADEPTPHASESHIFT = 2594
-	    # CANCEL_ADEPTSHADEPHASESHIFT = 2596
-
 		self.availableActions.append(FindEnemyAction())
 		self.availableActions.append(AttackEnemyAction())
 		self.availableActions.append(CreateScoutingHallucinationAction())

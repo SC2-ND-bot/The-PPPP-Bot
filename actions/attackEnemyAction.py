@@ -28,8 +28,8 @@ class AttackEnemyAction(Action):
 
 		enemies = gameObject.enemy_units()
 		unit_attack_range = max(unit.ground_range, unit.air_range)
-		
-		enemies_unit_can_attack = enemies.in_attack_range_of(unit, (unit.sight_range - unit_attack_range))
+
+		enemies_unit_can_attack = enemies.in_attack_range_of(unit, abs(unit.sight_range - unit_attack_range))
 
 		enemy_to_attack = None
 		for enemy in enemies_unit_can_attack:

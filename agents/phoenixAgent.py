@@ -2,6 +2,7 @@ from agents.agent import Agent
 from actions.findEnemyAction import FindEnemyAction
 from actions.attackEnemyAction import AttackEnemyAction
 from actions.retreatAction import RetreatAction
+from actions.hallucinationScoutAction import HallucinationScoutAction
 from actions.gravitonBeamAction import GravitonBeamAction
 
 class PhoenixAgent(Agent):
@@ -22,6 +23,7 @@ class PhoenixAgent(Agent):
 		self.availableActions.append(AttackEnemyAction())
 		self.availableActions.append(RetreatAction())
 		self.availableActions.append(GravitonBeamAction())
+		self.availableActions.append(HallucinationScoutAction())
 
 	def isPlanInvalid(self, gameObject):
 		# Add additional checks that should abort plan, like is_under_attack

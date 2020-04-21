@@ -18,10 +18,10 @@ class GravitonBeamAction(Action):
 
 	def checkProceduralPrecondition(self, gameObject, agent):
 		unit = agent.getUnit(gameObject)
-		
+
 		if self.abilityId not in agent.available_abilities:
 			return False
-		
+
 		enemies = gameObject.enemy_units()
 		enemies_unit_can_attack = enemies.closer_than(4.0, unit)
 		enemies_unit_can_attack = enemies_unit_can_attack.not_structure
@@ -31,7 +31,7 @@ class GravitonBeamAction(Action):
 			if enemy_to_attack is None:
 				enemy_to_attack = enemy
 			else:
-				if enemy_to_attack.shield_health_percentage > enemy.shield_health_percentage:
+				if enemy_to_attack.shield_health_percentage < enemy.shield_health_percentage:
 					enemy_to_attack = enemy
 
 		self.target = enemy_to_attack

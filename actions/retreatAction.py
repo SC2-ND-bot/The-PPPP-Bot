@@ -1,5 +1,7 @@
 from actions.action import Action
 from sc2.position import Point2, Point3
+from sc2.ids.unit_typeid import UnitTypeId
+
 import math
 
 class RetreatAction(Action):
@@ -14,10 +16,6 @@ class RetreatAction(Action):
 	def __repr__(self):
 		return "Retreat Action Class"
 
-	# def calcCost(self):
-	# 	# determine the cost for this action
-	# 	# will be used during planning
-
 	def reset(self):
 		self.retreatLocation = None
 
@@ -25,9 +23,16 @@ class RetreatAction(Action):
 		unit = agent.getUnit(gameObject)
 		weapon_cooldown = min(unit.weapon_cooldown, 1.61)
 		speed = unit.movement_speed
-		distance_to_travel = (speed * weapon_cooldown)
+		distance_to_travel = (speed * weapon_cooldown) / 2
 
 		enemies = gameObject.enemy_units()
+
+		if unit.is_flying:
+			enemies = enemies.filter(lambda enemy: enemy.can_attack_air)
+		elif unit.type_id == UnitTypeId.COLOSSUS:
+			enemies = enemies.filter(lambda enemy: enemy.can_attack)
+		else:
+			enemies = enemies.filter(lambda enemy: enemy.can_attack_ground)
 
 		if weapon_cooldown <= 0 and not agent.state['health_critical']:
 			return False

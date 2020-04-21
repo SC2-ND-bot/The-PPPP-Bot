@@ -9,8 +9,9 @@ class CreateScoutingHallucinationAction(Action):
 	def __init__(self):
 		super().__init__()
 		self.cost = 2
-		self.abilityId = AbilityId.HALLUCINATION_COLOSSUS
+		self.abilityId = AbilityId.HALLUCINATION_PHOENIX
 		self.effects["attacking"] = False
+		self.effects["defendBase"] = False
 		self.effects["hallucinationCreated"] = True
 
 	def __repr__(self):

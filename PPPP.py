@@ -54,11 +54,12 @@ class PPPP(sc2.BotAI):
 			self.agents[unit_tag].goal = ('attacking', True)
 
 	async def on_unit_created(self, unit):
-		try:
-			self.agents[unit.tag] = self.unit_agent_dict[unit.type_id](unit.tag, planner)
-			print("Made " + str(unit.type_id) + " agent")
-		except:
-			return
+		if unit.type_id is not UnitTypeId.PROBE:
+			try:
+				self.agents[unit.tag] = self.unit_agent_dict[unit.type_id](unit.tag, planner)
+				print("Made " + str(unit.type_id) + " agent")
+			except:
+				return
 
 	def getAgent(self, unit):
 		try:
@@ -121,7 +122,7 @@ class PPPP(sc2.BotAI):
 		possible_placements = []
 		for nexus in self.townhalls:
 			possible_placements.append(nexus.position.towards(map_center, distance=15))
-		
+
 		# Logic for execution of build tree (Milestone 2)
 		if self.time < 360:
 			inst = self.buildTree.stepDown(self.minerals, self.vespene, self.supply_left, self.state)
@@ -213,22 +214,22 @@ class PPPP(sc2.BotAI):
 
 	async def map_unitID_to_agent(self):
 		self.unit_agent_dict = {
-			ADEPT: AdeptAgent,
-			ZEALOT: ZealotAgent,
-			SENTRY: SentryAgent,
-			IMMORTAL: ImmortalAgent,
-			PHOENIX: PhoenixAgent,
-			STALKER: StalkerAgent,
-			HIGHTEMPLAR: HighTemplarAgent,
-			DARKTEMPLAR: DarkTemplarAgent,
-			VOIDRAY: VoidRayAgent,
-			OBSERVER: ObserverAgent,
-			INTERCEPTOR: InterceptorAgent,
-			COLOSSUS: ColossusAgent,
-			ARCHON: ArchonAgent,
-			MOTHERSHIP: MothershipAgent,
-			ORACLE: OracleAgent,
-			TEMPEST: TempestAgent
+			UnitTypeId.ADEPT: AdeptAgent,
+			UnitTypeId.ZEALOT: ZealotAgent,
+			UnitTypeId.SENTRY: SentryAgent,
+			UnitTypeId.IMMORTAL: ImmortalAgent,
+			UnitTypeId.PHOENIX: PhoenixAgent,
+			UnitTypeId.STALKER: StalkerAgent,
+			UnitTypeId.HIGHTEMPLAR: HighTemplarAgent,
+			UnitTypeId.DARKTEMPLAR: DarkTemplarAgent,
+			UnitTypeId.VOIDRAY: VoidRayAgent,
+			UnitTypeId.OBSERVER: ObserverAgent,
+			UnitTypeId.INTERCEPTOR: InterceptorAgent,
+			UnitTypeId.COLOSSUS: ColossusAgent,
+			UnitTypeId.ARCHON: ArchonAgent,
+			UnitTypeId.MOTHERSHIP: MothershipAgent,
+			UnitTypeId.ORACLE: OracleAgent,
+			UnitTypeId.TEMPEST: TempestAgent
 		}
 
 	def go_to_work(self, worker):
@@ -277,7 +278,7 @@ def main():
 	sc2.run_game(
 		sc2.maps.get("AcropolisLE"),
 		[Bot(Race.Protoss, PPPP(), name="The PPPP"), Computer(Race.Zerg, Difficulty.Easy)],
-		realtime=False,
+		realtime=True,
 	)
 
 if __name__ == "__main__":
