@@ -1,4 +1,5 @@
 from actions.action import Action
+from sc2.ids.unit_typeid import UnitTypeId
 
 class FindEnemyAction(Action):
 	def __init__(self):
@@ -29,8 +30,12 @@ class FindEnemyAction(Action):
 		if enemies_unit_can_attack.amount > 0:
 			return False
 
-		attackLocation = gameObject.enemy_start_locations[0]
-		self.attackLocation = attackLocation
+		if len(gameObject.enemy_structures(UnitTypeId.HATCHERY)) > 0:
+			self.attackLocation = gameObject.enemy_structures(UnitTypeId.HATCHERY)[0]
+		else:
+			attackLocation = gameObject.enemy_start_locations[0]
+			self.attackLocation = attackLocation
+
 		return self.attackLocation is not None
 
 	def perform(self, gameObject, agent, firstAction):

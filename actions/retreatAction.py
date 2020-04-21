@@ -27,6 +27,9 @@ class RetreatAction(Action):
 
 		enemies = gameObject.enemy_units()
 
+		if enemies.amount <= 0:
+			return False
+
 		if unit.is_flying:
 			enemies = enemies.filter(lambda enemy: enemy.can_attack_air)
 		elif unit.type_id == UnitTypeId.COLOSSUS:

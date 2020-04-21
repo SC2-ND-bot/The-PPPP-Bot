@@ -70,7 +70,6 @@ class PPPP(sc2.BotAI):
 
 	async def on_step(self, iteration):
 		if iteration == 0:
-			await self.chat_send("(probe)(pylon)(cannon)(cannon)(gg)")
 			await self.build_coord_dict()
 			await self.map_unitID_to_agent()
 			self.buildTree = buildOrder(self.game_data, self.enemy_race)
@@ -113,6 +112,9 @@ class PPPP(sc2.BotAI):
 						self.goalTriggers['lastTimeScouting'] = time.time()
 				elif unit.type_id == UnitTypeId.PHOENIX and unit.is_hallucination:
 					agent.goal = ('scouting', True)
+				elif self.supply_used > 190:
+					for unit_tag in self.agents:
+						self.agents[unit_tag].goal = ('attacking', True)
 				agent.stateMachine.run_step(self)
 
 		######################################################################################################
@@ -278,7 +280,7 @@ def main():
 	sc2.run_game(
 		sc2.maps.get("AcropolisLE"),
 		[Bot(Race.Protoss, PPPP(), name="The PPPP"), Computer(Race.Zerg, Difficulty.Easy)],
-		realtime=True,
+		realtime=False,
 	)
 
 if __name__ == "__main__":
